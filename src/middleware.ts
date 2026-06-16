@@ -26,10 +26,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (!isLoggedOut && isPublicRoute && path !== "/") {
-    // Redirect authenticated users away from auth pages to dashboard
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
+  // Disable automatic redirect from auth pages to dashboard to allow testing of /register and /login directly
+  // if (!isLoggedOut && isPublicRoute && path !== "/") {
+  //   // Redirect authenticated users away from auth pages to dashboard
+  //   return NextResponse.redirect(new URL("/dashboard", request.url));
+  // }
 
   if (isAdminRoute && userRole !== "admin") {
     // Redirect non-admin users to student dashboard

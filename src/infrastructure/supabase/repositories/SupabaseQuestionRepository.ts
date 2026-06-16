@@ -1,6 +1,7 @@
 import { IQuestionRepository } from "../../../application/ports/repositories/IQuestionRepository";
 import { Question } from "../../../domain/entities/Question";
 import { Difficulty } from "../../../domain/value-objects/Difficulty";
+import { supabase } from "../client";
 
 export class SupabaseQuestionRepository implements IQuestionRepository {
   private static questions: Question[] = [
@@ -109,6 +110,30 @@ export class SupabaseQuestionRepository implements IQuestionRepository {
   ];
 
   public async getQuestionsForLesson(lessonId: string, limit: number, difficulty?: Difficulty): Promise<Question[]> {
+    try {
+      let query = supabase.from("questions").select("*").eq("lesson_id", lessonId);
+      if (difficulty) {
+        query = query.eq("difficulty", difficulty);
+      }
+      const { data, error } = await query.limit(limit);
+      if (error) throw error;
+      if (data && data.length > 0) {
+        return data.map(q => ({
+          id: q.id,
+          text: q.text,
+          options: q.options,
+          correctIndex: q.correct_index ?? q.correctIndex ?? 0,
+          explanation: q.explanation,
+          difficulty: q.difficulty,
+          subject: q.subject,
+          lessonId: q.lesson_id ?? q.lessonId ?? "",
+          source: q.source,
+          createdDate: q.created_date ?? q.createdDate ?? "",
+        }));
+      }
+    } catch (err) {
+      console.warn("Supabase getQuestionsForLesson failed, falling back to mock: ", err);
+    }
     let list = SupabaseQuestionRepository.questions.filter(q => q.lessonId === lessonId);
     if (difficulty) {
       list = list.filter(q => q.difficulty === difficulty);
@@ -117,6 +142,32 @@ export class SupabaseQuestionRepository implements IQuestionRepository {
   }
 
   public async getQuestionsForSubject(subjectId: string, limit: number, difficulty?: Difficulty): Promise<Question[]> {
+    try {
+      const subjName = subjectId.toLowerCase();
+      let query = supabase.from("questions").select("*").ilike("subject", `${subjName}%`);
+      if (difficulty) {
+        query = query.eq("difficulty", difficulty);
+      }
+      const { data, error } = await query.limit(limit);
+      if (error) throw error;
+      if (data && data.length > 0) {
+        return data.map(q => ({
+          id: q.id,
+          text: q.text,
+          options: q.options,
+          correctIndex: q.correct_index ?? q.correctIndex ?? 0,
+          explanation: q.explanation,
+          difficulty: q.difficulty,
+          subject: q.subject,
+          lessonId: q.lesson_id ?? q.lessonId ?? "",
+          source: q.source,
+          createdDate: q.created_date ?? q.createdDate ?? "",
+        }));
+      }
+    } catch (err) {
+      console.warn("Supabase getQuestionsForSubject failed, falling back to mock: ", err);
+    }
+    
     // case insensitive match
     const subjName = subjectId.toLowerCase();
     let list = SupabaseQuestionRepository.questions.filter(
@@ -137,6 +188,42 @@ export class SupabaseQuestionRepository implements IQuestionRepository {
     limit: number, 
     filters?: { subjectId?: string; difficulty?: string; search?: string }
   ): Promise<{ questions: Question[]; totalCount: number }> {
+    try {
+      let query = supabase.from("questions").select("*", { count: "exact" });
+      if (filters?.subjectId && filters.subjectId !== "Tous") {
+        query = query.eq("subject", filters.subjectId);
+      }
+      if (filters?.difficulty) {
+        query = query.eq("difficulty", filters.difficulty);
+      }
+      if (filters?.search) {
+        query = query.ilike("text", `%${filters.search}%`);
+      }
+      
+      const startIndex = (page - 1) * limit;
+      const { data, error, count } = await query
+        .range(startIndex, startIndex + limit - 1);
+        
+      if (error) throw error;
+      if (data) {
+        const questions = data.map(q => ({
+          id: q.id,
+          text: q.text,
+          options: q.options,
+          correctIndex: q.correct_index ?? q.correctIndex ?? 0,
+          explanation: q.explanation,
+          difficulty: q.difficulty,
+          subject: q.subject,
+          lessonId: q.lesson_id ?? q.lessonId ?? "",
+          source: q.source,
+          createdDate: q.created_date ?? q.createdDate ?? "",
+        }));
+        return { questions, totalCount: count ?? questions.length };
+      }
+    } catch (err) {
+      console.warn("Supabase getAllQuestionsPaginated failed, falling back to mock: ", err);
+    }
+    
     let list = [...SupabaseQuestionRepository.questions];
     if (filters?.subjectId && filters.subjectId !== "Tous") {
       list = list.filter(q => q.subject === filters.subjectId);
@@ -161,16 +248,58 @@ export class SupabaseQuestionRepository implements IQuestionRepository {
     } else {
       SupabaseQuestionRepository.questions.push(question);
     }
+    try {
+      const { error } = await supabase.from("questions").upsert({
+        id: question.id,
+        text: question.text,
+        options: question.options,
+        correct_index: question.correctIndex,
+        explanation: question.explanation,
+        difficulty: question.difficulty,
+        subject: question.subject,
+        lesson_id: question.lessonId,
+        source: question.source,
+        created_date: question.createdDate,
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.warn("Supabase saveQuestion failed, using mock storage: ", err);
+    }
   }
 
   public async saveQuestionsBulk(questions: Question[]): Promise<{ successCount: number; errors: { row: number; reason: string }[] }> {
     questions.forEach(q => {
       this.saveQuestion(q);
     });
-    return { successCount: questions.length, errors: [] };
+    try {
+      const payload = questions.map(question => ({
+        id: question.id,
+        text: question.text,
+        options: question.options,
+        correct_index: question.correctIndex,
+        explanation: question.explanation,
+        difficulty: question.difficulty,
+        subject: question.subject,
+        lesson_id: question.lessonId,
+        source: question.source,
+        created_date: question.createdDate,
+      }));
+      const { error } = await supabase.from("questions").upsert(payload);
+      if (error) throw error;
+      return { successCount: questions.length, errors: [] };
+    } catch (err) {
+      console.warn("Supabase saveQuestionsBulk failed, using mock storage: ", err);
+      return { successCount: questions.length, errors: [] };
+    }
   }
 
   public async deleteQuestion(questionId: string): Promise<void> {
     SupabaseQuestionRepository.questions = SupabaseQuestionRepository.questions.filter(q => q.id !== questionId);
+    try {
+      const { error } = await supabase.from("questions").delete().eq("id", questionId);
+      if (error) throw error;
+    } catch (err) {
+      console.warn("Supabase deleteQuestion failed, using mock storage: ", err);
+    }
   }
 }

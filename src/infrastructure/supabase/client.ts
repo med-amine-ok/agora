@@ -1,27 +1,11 @@
-// Basic Supabase client wrapper with fallback
-export const supabase = {
-  auth: {
-    getSession: async () => ({ data: { session: null }, error: null }),
-    onAuthStateChange: (callback: any) => {
-      return { data: { subscription: { unsubscribe: () => {} } } };
-    },
-    signInWithPassword: async () => ({ data: { user: null }, error: null }),
-    signUp: async () => ({ data: { user: null }, error: null }),
-    signOut: async () => ({ error: null }),
-  },
-  from: (table: string) => ({
-    select: () => ({
-      eq: () => ({
-        single: async () => ({ data: null, error: null }),
-        maybeSingle: async () => ({ data: null, error: null })
-      }),
-      order: () => ({
-        limit: async () => ({ data: [], error: null })
-      })
-    }),
-    insert: async () => ({ error: null }),
-    update: () => ({
-      eq: async () => ({ error: null })
-    })
-  })
-};
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn("Warning: Supabase credentials are not fully loaded from environment variables yet.");
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+

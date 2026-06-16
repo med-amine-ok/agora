@@ -53,6 +53,10 @@ export const useUserStore = create<UserStore>((set, get) => ({
     if (mockUser) {
       // Simulate login
       mockUser.email = email;
+      if (typeof document !== "undefined") {
+        document.cookie = "logged_out=false; path=/; max-age=31536000";
+        document.cookie = `user_role=${mockUser.role || "student"}; path=/; max-age=31536000`;
+      }
       get().setUser(mockUser);
       await get().loadFriends();
       return true;
@@ -75,11 +79,19 @@ export const useUserStore = create<UserStore>((set, get) => ({
       isPremium: false,
       joinDate: new Date().toISOString().split("T")[0]
     };
+    if (typeof document !== "undefined") {
+      document.cookie = "logged_out=false; path=/; max-age=31536000";
+      document.cookie = "user_role=student; path=/; max-age=31536000";
+    }
     await container.userRepository.saveUser(newUser);
     get().setUser(newUser);
   },
 
   logout: () => {
+    if (typeof document !== "undefined") {
+      document.cookie = "logged_out=true; path=/; max-age=31536000";
+      document.cookie = "user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+    }
     get().clearUser();
   },
 
