@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Zap, BarChart3, Flame, ArrowRight, Play, Users, MessageSquare } from "lucide-react";
+import { motion } from "framer-motion";
+import { BookOpen, Zap, BarChart3, ArrowRight, Play, Users } from "lucide-react";
 import Button from "@/presentation/components/ui/Button";
 import Card from "@/presentation/components/ui/Card";
 import {
@@ -11,15 +11,16 @@ import {
   MicroscopeIcon,
   DnaIcon,
   BrainIcon,
-  PillIcon,
   AnimatedEcgWaveform
 } from "@/presentation/components/icons/MedicalIcons";
 
 export default function Home() {
   const [studentCount, setStudentCount] = useState(9400);
+  const [mounted, setMounted] = useState(false);
 
-  // Animate rolling counter for social proof
+  // Set mounted state and counter animation
   useEffect(() => {
+    setTimeout(() => setMounted(true), 0);
     const handle = setInterval(() => {
       setStudentCount(prev => {
         if (prev >= 10450) {
@@ -59,6 +60,33 @@ export default function Home() {
     { name: "Lina C.", univ: "Faculté d'Oran", quote: "Le mode Salon permet de réviser en groupe avec mes collègues à distance, c'est convivial et stimulant." }
   ];
 
+  // Animation variants
+  const fadeIn = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
+  };
+
+  const scaleUp = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: "easeOut" as const } }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1
+      }
+    }
+  };
+
+  const headerVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
+
   return (
     <div className="min-h-screen bg-beige-base text-text-dark font-sans flex flex-col relative overflow-hidden">
       
@@ -77,7 +105,12 @@ export default function Home() {
       </div>
 
       {/* Navigation Header */}
-      <header className="w-full max-w-[1200px] mx-auto px-6 py-5 flex items-center justify-between border-b border-border-brand/40 relative z-20">
+      <motion.header 
+        initial={mounted ? "hidden" : "visible"}
+        animate="visible"
+        variants={headerVariants}
+        className="w-full max-w-[1200px] mx-auto px-6 py-5 flex items-center justify-between border-b border-border-brand/40 relative z-20"
+      >
         <Link href="/" className="flex items-center gap-2">
           <span className="font-serif text-3xl font-bold tracking-wide text-green-dark">Agora</span>
         </Link>
@@ -91,24 +124,29 @@ export default function Home() {
             <Button variant="ghost" size="sm">Connexion</Button>
           </Link>
           <Link href="/register">
-            <Button size="sm" className="hidden sm:inline-flex">S'inscrire</Button>
+            <Button size="sm" className="hidden sm:inline-flex">S&apos;inscrire</Button>
           </Link>
         </div>
-      </header>
+      </motion.header>
 
       {/* Hero Section */}
       <section className="w-full max-w-[1200px] mx-auto px-6 pt-16 pb-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
-        <div className="flex flex-col space-y-6 text-left">
-          <div className="inline-flex items-center gap-2 bg-green-dark/10 text-green-dark font-semibold font-mono text-xs px-3 py-1.5 rounded-full border border-green-mid/20 w-fit">
+        <motion.div 
+          initial={mounted ? "hidden" : "visible"}
+          animate="visible"
+          variants={staggerContainer}
+          className="flex flex-col space-y-6 text-left"
+        >
+          <motion.div variants={fadeIn} className="inline-flex items-center gap-2 bg-green-dark/10 text-green-dark font-semibold font-mono text-xs px-3 py-1.5 rounded-full border border-green-mid/20 w-fit">
             🎓 Dédié aux Carabins Algériens
-          </div>
-          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl font-extrabold text-green-dark leading-[1.1] tracking-tight">
-            Apprendre.<br />S'évaluer.<br />Exceller.
-          </h1>
-          <p className="text-text-mid text-lg sm:text-xl max-w-lg leading-relaxed">
-            La plateforme d'excellence médicale associant des cours clairs, des défis chronométrés et une communauté d'entraide compétitive.
-          </p>
-          <div className="flex flex-wrap gap-4 pt-2">
+          </motion.div>
+          <motion.h1 variants={fadeIn} className="font-serif text-5xl sm:text-6xl md:text-7xl font-extrabold text-green-dark leading-[1.1] tracking-tight">
+            Apprendre.<br />S&apos;évaluer.<br />Exceller.
+          </motion.h1>
+          <motion.p variants={fadeIn} className="text-text-mid text-lg sm:text-xl max-w-lg leading-relaxed">
+            La plateforme d&apos;excellence médicale associant des cours clairs, des défis chronométrés et une communauté d&apos;entraide compétitive.
+          </motion.p>
+          <motion.div variants={fadeIn} className="flex flex-wrap gap-4 pt-2">
             <Link href="/register">
               <Button size="lg" className="flex items-center gap-2 group">
                 Commencer gratuitement
@@ -121,15 +159,15 @@ export default function Home() {
                 Voir la démo
               </Button>
             </a>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Hero Interactive 3D Perspective Card Mockup */}
         <div className="relative flex items-center justify-center lg:justify-end xl:pr-10">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={mounted ? "hidden" : "visible"}
+            animate="visible"
+            variants={scaleUp}
             className="w-full max-w-[460px] bg-green-dark text-white rounded-lg shadow-2xl p-6 border border-white/10"
           >
             {/* Header */}
@@ -178,66 +216,92 @@ export default function Home() {
       {/* Feature Cards Grid Section */}
       <section id="features" className="w-full bg-beige-light border-y border-border-brand/40 py-20">
         <div className="w-full max-w-[1200px] mx-auto px-6">
-          <div className="text-center max-w-xl mx-auto mb-16 space-y-3">
+          <motion.div 
+            initial={mounted ? "hidden" : "visible"}
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeIn}
+            className="text-center max-w-xl mx-auto mb-16 space-y-3"
+          >
             <span className="text-sm font-bold text-green-mid font-mono tracking-widest uppercase">Espace Carabins</span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-green-dark">
-              Conçu pour le quotidien exigeant de l'externat
+              Conçu pour le quotidien exigeant de l&apos;externat
             </h2>
             <p className="text-text-mid text-sm">
-              Des heures d'études quotidiennes demandent un outil rapide, fiable et esthétique qui favorise une mémorisation active à long terme.
+              Des heures d&apos;études quotidiennes demandent un outil rapide, fiable et esthétique qui favorise une mémorisation active à long terme.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div 
+            initial={mounted ? "hidden" : "visible"}
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {features.map((feat, idx) => {
               const Icon = feat.icon;
               return (
-                <Card key={idx} hoverEffect borderTint={feat.tint} className="flex flex-col space-y-4">
-                  <div className="w-12 h-12 rounded-sm bg-beige-base flex items-center justify-center border border-green-light/20">
-                    <Icon className="w-6 h-6 text-green-mid" />
-                  </div>
-                  <h3 className="text-lg font-bold text-green-dark">{feat.title}</h3>
-                  <p className="text-text-mid text-sm leading-relaxed flex-1">{feat.desc}</p>
-                </Card>
+                <motion.div key={idx} variants={fadeIn} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
+                  <Card hoverEffect borderTint={feat.tint} className="flex flex-col space-y-4 h-full">
+                    <div className="w-12 h-12 rounded-sm bg-beige-base flex items-center justify-center border border-green-light/20">
+                      <Icon className="w-6 h-6 text-green-mid" />
+                    </div>
+                    <h3 className="text-lg font-bold text-green-dark">{feat.title}</h3>
+                    <p className="text-text-mid text-sm leading-relaxed flex-1">{feat.desc}</p>
+                  </Card>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Demo Blitz Mode Simulator */}
       <section id="demo" className="w-full max-w-[1200px] mx-auto px-6 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-6">
-            <span className="text-sm font-bold text-green-mid font-mono uppercase tracking-widest">
+          <motion.div 
+            initial={mounted ? "hidden" : "visible"}
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="space-y-6"
+          >
+            <motion.span variants={fadeIn} className="text-sm font-bold text-green-mid font-mono uppercase tracking-widest">
               Simulateur Blitz
-            </span>
-            <h2 className="font-serif text-4xl sm:text-5xl font-bold text-green-dark">
+            </motion.span>
+            <motion.h2 variants={fadeIn} className="font-serif text-4xl sm:text-5xl font-bold text-green-dark">
               Tenez le coup sous la pression du temps
-            </h2>
-            <p className="text-text-mid">
-              Le mode Blitz teste vos réflexes cliniques : vous gagnez <strong className="text-green-mid font-semibold">+5s</strong> par bonne réponse et perdez <strong className="text-error-brand font-semibold">-5s</strong> par erreur. Le chrono s'emballe !
-            </p>
+            </motion.h2>
+            <motion.p variants={fadeIn} className="text-text-mid">
+              Le mode Blitz teste vos réflexes cliniques : vous gagnez <strong className="text-green-mid font-semibold">+5s</strong> par bonne réponse et perdez <strong className="text-error-brand font-semibold">-5s</strong> par erreur. Le chrono s&apos;emballe !
+            </motion.p>
 
             {/* Social Proof Stats */}
-            <div className="pt-4 flex items-center gap-3">
+            <motion.div variants={fadeIn} className="pt-4 flex items-center gap-3">
               <Users className="w-10 h-10 text-green-mid shrink-0" />
               <div>
                 <span className="font-mono text-2xl font-bold text-green-dark">{studentCount.toLocaleString()}</span>
                 <p className="text-xs text-text-light font-semibold uppercase">Étudiants algériens déjà inscrits</p>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Animated Mock Card Simulator */}
-          <div className="bg-beige-light border border-border-brand p-8 rounded-lg flex flex-col space-y-6 shadow-inner relative overflow-hidden">
+          <motion.div 
+            initial={mounted ? "hidden" : "visible"}
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={scaleUp}
+            className="bg-beige-light border border-border-brand p-8 rounded-lg flex flex-col space-y-6 shadow-inner relative overflow-hidden"
+          >
             <div className="flex items-center justify-between text-xs font-mono font-bold text-text-mid border-b border-border-brand/40 pb-2">
               <span>Mode Blitz (Démo)</span>
               <span className="text-gold-brand animate-pulse">⚡ Chrono actif : 23s</span>
             </div>
 
             <div className="p-4 bg-white rounded-sm border border-border-brand text-sm font-serif font-bold text-green-dark leading-snug">
-              Quelle complication majeure suspecte-t-on devant l'apparition d'une céphalée orthostatique après une ponction lombaire ?
+              Quelle complication majeure suspecte-t-on devant l&apos;apparition d&apos;une céphalée orthostatique après une ponction lombaire ?
             </div>
 
             <div className="space-y-2.5">
@@ -252,22 +316,39 @@ export default function Home() {
                 C. Une méningite foudroyante
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Testimonials */}
       <section id="testimonials" className="bg-beige-light border-t border-border-brand/40 py-20 px-6">
         <div className="max-w-[1200px] mx-auto text-center space-y-12">
-          <div className="max-w-xl mx-auto space-y-2">
+          <motion.div 
+            initial={mounted ? "hidden" : "visible"}
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeIn}
+            className="max-w-xl mx-auto space-y-2"
+          >
             <span className="text-sm font-bold text-green-mid font-mono uppercase tracking-widest">Témoignages</span>
             <h2 className="font-serif text-3xl font-bold text-green-dark">Recommandé par vos collègues de promotion</h2>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div 
+            initial={mounted ? "hidden" : "visible"}
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {testimonials.map((test, idx) => (
-              <div key={idx} className="bg-beige-base p-6 rounded-md border border-border-brand/40 text-left space-y-4 shadow-sm flex flex-col justify-between">
-                <p className="text-text-mid text-sm italic leading-relaxed">"{test.quote}"</p>
+              <motion.div 
+                key={idx} 
+                variants={fadeIn}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="bg-beige-base p-6 rounded-md border border-border-brand/40 text-left space-y-4 shadow-sm flex flex-col justify-between"
+              >
+                <p className="text-text-mid text-sm italic leading-relaxed">&ldquo;{test.quote}&rdquo;</p>
                 <div className="flex items-center gap-3 border-t border-border-brand/40 pt-4">
                   <div className="w-9 h-9 rounded-full bg-green-dark text-white flex items-center justify-center font-bold text-sm">
                     {test.name.charAt(4)}
@@ -277,9 +358,9 @@ export default function Home() {
                     <span className="text-[10px] text-text-light font-mono font-semibold uppercase">{test.univ}</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -288,21 +369,27 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-64 h-64 bg-green-light/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-accent/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-2xl mx-auto space-y-6 relative z-10">
-          <h2 className="font-serif text-3xl sm:text-5xl font-bold">
+        <motion.div 
+          initial={mounted ? "hidden" : "visible"}
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+          className="max-w-2xl mx-auto space-y-6 relative z-10"
+        >
+          <motion.h2 variants={fadeIn} className="font-serif text-3xl sm:text-5xl font-bold">
             Prêt à surclasser vos résultats ?
-          </h2>
-          <p className="text-green-light/85 text-base sm:text-lg max-w-lg mx-auto">
-            Rejoignez dès aujourd'hui les étudiants des facultés d'Alger, Oran, Constantine et de tout le pays sur la plateforme d'excellence.
-          </p>
-          <div className="pt-4">
+          </motion.h2>
+          <motion.p variants={fadeIn} className="text-green-light/85 text-base sm:text-lg max-w-lg mx-auto">
+            Rejoignez dès aujourd&apos;hui les étudiants des facultés d&apos;Alger, Oran, Constantine et de tout le pays sur la plateforme d&apos;excellence.
+          </motion.p>
+          <motion.div variants={fadeIn} className="pt-4">
             <Link href="/register">
               <Button variant="accent" size="lg" className="w-full sm:w-auto">
                 Créer mon compte maintenant
               </Button>
             </Link>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Footer */}

@@ -619,7 +619,7 @@ AS $$
 $$;
 -- 7.1 scheduled Cron Refresh notes
 -- To run MV refresh automatically in Supabase every 5 minutes:
--- SELECT cron.schedule('refresh-blitz-leaderboard', '*/5 * * * *', 'REFRESH MATERIALIZED VIEW CONCURRENTLY public.blitz_leaderboard_mv;');
+SELECT cron.schedule('refresh-blitz-leaderboard', '*/5 * * * *', 'REFRESH MATERIALIZED VIEW CONCURRENTLY public.blitz_leaderboard_mv;');
 -- ----------------------------------------------------------------------------
 -- 8. ROW LEVEL SECURITY (RLS) POLICIES
 -- ----------------------------------------------------------------------------
