@@ -1,28 +1,28 @@
 import type { Metadata } from "next";
-import { Outfit, Playfair_Display, JetBrains_Mono } from "next/font/google";
+import { Playfair_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair-display",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains",
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Agora — Plateforme d'Apprentissage Médical",
-  description: "La plateforme d'excellence pour les étudiants en médecine algériens. Quiz, leçons structurées et statistiques.",
+  title: "Agora | Plateforme d'Éducation Médicale Premium",
+  description: "Cours structurés, quiz compétitifs et multijoueur en temps réel conçus exclusivement pour les étudiants en médecine algériens.",
 };
 
 export default function RootLayout({
@@ -33,9 +33,9 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${outfit.variable} ${playfairDisplay.variable} ${jetbrainsMono.variable} h-full antialiased scroll-smooth`}
+      className={`${playfairDisplay.variable} ${dmSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-white-brand text-text-dark">
+      <body className="min-h-full flex flex-col bg-white-custom font-sans antialiased selection:bg-teal-light/20 selection:text-teal-dark">
         {children}
       </body>
     </html>

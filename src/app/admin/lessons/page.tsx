@@ -1,165 +1,342 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import SidebarLayout from "@/presentation/components/layout/SidebarLayout";
-import Card from "@/presentation/components/ui/Card";
-import Button from "@/presentation/components/ui/Button";
-import { ChevronLeft, Plus, Search, BookOpen, Clock, Edit2, Trash2, Filter } from "lucide-react";
+import { 
+  FileText, 
+  Plus, 
+  Trash2, 
+  Edit3, 
+  Eye, 
+  Check, 
+  EyeOff, 
+  History,
+  X,
+  BookOpen
+} from "lucide-react";
 
-interface AdminLesson {
+interface Lesson {
   id: string;
   title: string;
   subject: string;
-  readTime: number;
-  questionCount: number;
-  lastUpdated: string;
+  unit: string;
+  status: "publié" | "brouillon";
+  content: string;
+  versions: string[];
 }
 
-export default function AdminLessons() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("Tous");
-  const [currentPage, setCurrentPage] = useState(1);
+const mockLessons: Lesson[] = [
+  { 
+    id: "l1", 
+    title: "Infarctus aigu du myocarde (SCA ST+)", 
+    subject: "Cardiologie", 
+    unit: "Unité Cardiovasculaire", 
+    status: "publié", 
+    content: "# Infarctus aigu du myocarde (SCA ST+)\n\n## Définition\nL'infarctus aigu du myocarde (SCA ST+) est provoqué par l'occlusion complète d'une artère coronaire.\n\n## Diagnostic ECG\n- Sus-décalage du segment ST (onde de Pardee) dans au moins deux dérivations contiguës.\n- Image en miroir.",
+    versions: ["Version 2 (Modifiée par Dr. Belkacem)", "Version 1 (Création initiale)"]
+  },
+  { 
+    id: "l2", 
+    title: "Diagnostic de l'embolie pulmonaire", 
+    subject: "Pneumologie", 
+    unit: "Unité Respiratoire", 
+    status: "publié", 
+    content: "# Embolie Pulmonaire\n\n## Signes cliniques\n- Dyspnée aiguë\n- Douleur thoracique latéro-thoracique",
+    versions: ["Version 1 (Création initiale)"]
+  },
+  { 
+    id: "l3", 
+    title: "Péricardite aiguë bénigne", 
+    subject: "Cardiologie", 
+    unit: "Unité Cardiovasculaire", 
+    status: "brouillon", 
+    content: "# Péricardite aiguë\n\n## ECG\n- Sus-décalage du ST concave vers le haut.",
+    versions: ["Version 1 (Brouillon initial)"]
+  }
+];
 
-  const [lessons, setLessons] = useState<AdminLesson[]>([
-    { id: "insuffisance-cardiaque", title: "Traitement de l'Insuffisance Cardiaque", subject: "Cardiologie", readTime: 12, questionCount: 15, lastUpdated: "12 Mai 2026" },
-    { id: "infarctus-myocarde", title: "Infarctus du Myocarde - SCA ST+ (Phase aiguë)", subject: "Cardiologie", readTime: 15, questionCount: 18, lastUpdated: "14 Mai 2026" },
-    { id: "membre-superieur", title: "Vasculo-nerveux du membre supérieur", subject: "Anatomie", readTime: 10, questionCount: 8, lastUpdated: "20 Mai 2026" },
-    { id: "rachitisme-carentiel", title: "Rachitisme carentiel et sa prophylaxie", subject: "Pédiatrie", readTime: 8, questionCount: 10, lastUpdated: "22 Mai 2026" },
-    { id: "canal-inguinal", title: "Anatomie du Canal Inguinal", subject: "Anatomie", readTime: 9, questionCount: 6, lastUpdated: "24 Mai 2026" }
-  ]);
+export default function LessonsPage() {
+  const [lessons, setLessons] = useState<Lesson[]>(mockLessons);
+  const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+  const [editorTitle, setEditorTitle] = useState("");
+  const [editorSubject, setEditorSubject] = useState("Cardiologie");
+  const [editorUnit, setEditorUnit] = useState("Unité Cardiovasculaire");
+  const [editorStatus, setEditorStatus] = useState<"publié" | "brouillon">("brouillon");
+  const [editorContent, setEditorContent] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+
+  const startCreate = () => {
+    setEditingLesson(null);
+    setEditorTitle("");
+    setEditorSubject("Cardiologie");
+    setEditorUnit("Unité Cardiovasculaire");
+    setEditorStatus("brouillon");
+    setEditorContent("");
+    setShowEditor(true);
+    setShowPreview(false);
+  };
+
+  const startEdit = (lesson: Lesson) => {
+    setEditingLesson(lesson);
+    setEditorTitle(lesson.title);
+    setEditorSubject(lesson.subject);
+    setEditorUnit(lesson.unit);
+    setEditorStatus(lesson.status);
+    setEditorContent(lesson.content);
+    setShowEditor(true);
+    setShowPreview(false);
+  };
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editorTitle.trim()) return;
+
+    if (editingLesson) {
+      // Edit existing
+      setLessons(prev => prev.map(l => {
+        if (l.id === editingLesson.id) {
+          return {
+            ...l,
+            title: editorTitle,
+            subject: editorSubject,
+            unit: editorUnit,
+            status: editorStatus,
+            content: editorContent,
+            versions: [`Modifié le ${new Date().toLocaleDateString()}`, ...l.versions]
+          };
+        }
+        return l;
+      }));
+    } else {
+      // Create new
+      const newLesson: Lesson = {
+        id: Math.floor(Math.random() * 1000).toString(),
+        title: editorTitle,
+        subject: editorSubject,
+        unit: editorUnit,
+        status: editorStatus,
+        content: editorContent,
+        versions: [`Création le ${new Date().toLocaleDateString()}`]
+      };
+      setLessons(prev => [newLesson, ...prev]);
+    }
+
+    setShowEditor(false);
+    setEditingLesson(null);
+  };
 
   const handleDelete = (id: string) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer cette leçon ?")) {
-      setLessons(lessons.filter(l => l.id !== id));
+    if (confirm("Supprimer définitivement cette leçon ?")) {
+      setLessons(prev => prev.filter(l => l.id !== id));
     }
   };
 
-  const filteredLessons = lessons.filter(l => {
-    const matchesSearch = l.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSubject = selectedSubject === "Tous" || l.subject === selectedSubject;
-    return matchesSearch && matchesSubject;
-  });
-
-  const subjects = ["Tous", "Cardiologie", "Anatomie", "Pédiatrie"];
-
   return (
-    <SidebarLayout>
-      <div className="space-y-8 pb-16 select-none">
-        
-        {/* Navigation & Actions */}
-        <div className="space-y-2">
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-light hover:text-green-mid transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" /> Retour à l'administration
-          </Link>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="font-serif text-3xl font-bold text-green-dark">Gestion des Leçons</h1>
-              <p className="text-text-mid text-sm mt-1">
-                Rédigez, modifiez et structurez le contenu de référence scientifique d'Agora.
-              </p>
-            </div>
-            <Link href="/admin/lessons/new">
-              <Button className="flex items-center gap-1.5 self-start sm:self-auto">
-                <Plus className="w-4 h-4" /> Nouvelle Leçon
-              </Button>
-            </Link>
-          </div>
+    <div className="space-y-8">
+      {/* Header banner */}
+      <div className="border-b border-teal/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-text-dark flex items-center gap-2">
+            <FileText className="h-6 w-6 text-accent" /> Gestion des Leçons Médicales
+          </h1>
+          <p className="text-xs text-text-light mt-1 uppercase font-mono tracking-wider">
+            Rédigez des cours cliniques en Markdown, classez-les par matière et révisez les versions antérieures.
+          </p>
         </div>
 
-        {/* Filters */}
-        <Card className="p-4 flex flex-col sm:flex-row gap-4 items-center justify-between border-border-brand/40 text-sm">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="font-semibold text-teal-dark flex items-center gap-1.5">
-              <Filter className="w-4 h-4" /> Filtrer par matière :
-            </span>
-            <select
-              value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              className="p-2 border border-border-brand bg-white rounded-sm text-xs text-text-dark focus:outline-none"
+        {!showEditor && (
+          <button 
+            onClick={startCreate}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal text-white-custom hover:bg-teal-dark text-xs font-bold transition-all"
+          >
+            <Plus className="h-4 w-4" /> Rédiger une Leçon
+          </button>
+        )}
+      </div>
+
+      {/* Editor Modal/Panel */}
+      {showEditor && (
+        <div className="p-6 rounded-2xl border border-teal/10 bg-white-custom shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b border-teal/10 pb-4">
+            <h3 className="font-display text-base font-bold text-text-dark">
+              {editingLesson ? `Édition : ${editingLesson.title}` : "Nouvelle Leçon"}
+            </h3>
+            <button 
+              onClick={() => setShowEditor(false)}
+              className="p-1 rounded-full hover:bg-surface text-text-light"
             >
-              {subjects.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
-          <div className="relative w-full sm:w-80">
-            <input
-              type="text"
-              placeholder="Rechercher une leçon par titre..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-border-brand rounded-sm text-xs bg-white text-text-dark focus:outline-none focus:border-green-mid"
-            />
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-text-light" />
-          </div>
-        </Card>
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Titre</label>
+                <input
+                  type="text"
+                  value={editorTitle}
+                  onChange={(e) => setEditorTitle(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Matière</label>
+                <select
+                  value={editorSubject}
+                  onChange={(e) => setEditorSubject(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark"
+                >
+                  <option value="Cardiologie">Cardiologie</option>
+                  <option value="Pneumologie">Pneumologie</option>
+                  <option value="Gastro-entérologie">Gastro-entérologie</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Unité clinique</label>
+                <input
+                  type="text"
+                  value={editorUnit}
+                  onChange={(e) => setEditorUnit(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark"
+                />
+              </div>
+            </div>
 
-        {/* Table list */}
-        <Card className="p-6 overflow-hidden">
+            <div>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Contenu (Markdown)</label>
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="text-xs text-teal font-semibold hover:underline"
+                >
+                  {showPreview ? "Retour à l'éditeur" : "Prévisualiser"}
+                </button>
+              </div>
+
+              {showPreview ? (
+                <div className="mt-1 p-4 rounded-xl border border-teal/10 bg-surface/20 min-h-60 prose max-w-none text-xs text-text-main whitespace-pre-wrap">
+                  {editorContent || "*Aucun contenu rédigé*"}
+                </div>
+              ) : (
+                <textarea
+                  rows={10}
+                  value={editorContent}
+                  onChange={(e) => setEditorContent(e.target.value)}
+                  placeholder="Rédigez en Markdown..."
+                  className="w-full mt-1 p-3 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark font-mono"
+                />
+              )}
+            </div>
+
+            <div>
+              <label className="text-[10px] uppercase font-mono text-text-light font-bold block mb-1">Statut</label>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-1.5 text-xs text-text-main font-semibold">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="publié"
+                    checked={editorStatus === "publié"}
+                    onChange={() => setEditorStatus("publié")}
+                  /> Publié
+                </label>
+                <label className="flex items-center gap-1.5 text-xs text-text-main font-semibold">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="brouillon"
+                    checked={editorStatus === "brouillon"}
+                    onChange={() => setEditorStatus("brouillon")}
+                  /> Brouillon
+                </label>
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end border-t border-teal/10 pt-4">
+              <button 
+                type="button"
+                onClick={() => setShowEditor(false)}
+                className="px-4 py-2 rounded-lg border border-teal/10 hover:bg-surface text-xs font-semibold text-text-dark"
+              >
+                Annuler
+              </button>
+              <button 
+                type="submit"
+                className="px-6 py-2 bg-teal text-white-custom hover:bg-teal-dark rounded-lg text-xs font-bold shadow-sm"
+              >
+                Sauvegarder la Leçon
+              </button>
+            </div>
+          </form>
+
+          {editingLesson && (
+            <div className="space-y-2 border-t border-teal/10 pt-4">
+              <h4 className="text-[10px] font-mono uppercase text-text-light tracking-wider font-bold flex items-center gap-1">
+                <History className="h-3.5 w-3.5 text-teal" /> Historique des versions
+              </h4>
+              <div className="space-y-1">
+                {editingLesson.versions.map((ver, i) => (
+                  <p key={i} className="text-[10px] font-mono text-text-light">{ver}</p>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Lessons table */}
+      {!showEditor && (
+        <div className="border border-teal/10 bg-white-custom rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-xs text-left">
               <thead>
-                <tr className="border-b border-border-brand/40 text-xs text-text-light font-mono uppercase pb-2">
-                  <th className="py-3 px-2">Titre du cours</th>
-                  <th className="py-3 px-2">Spécialité</th>
-                  <th className="py-3 px-2">Temps de lecture</th>
-                  <th className="py-3 px-2">QCMs liés</th>
-                  <th className="py-3 px-2">Mis à jour</th>
-                  <th className="py-3 px-2 text-right">Actions</th>
+                <tr className="border-b border-teal/10 bg-surface/20 text-text-light uppercase tracking-wider font-mono text-[10px]">
+                  <th className="p-4">Titre de la leçon</th>
+                  <th className="p-4">Matière relationnelle</th>
+                  <th className="p-4">Unité / Module</th>
+                  <th className="p-4">Statut</th>
+                  <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="text-sm divide-y divide-border-brand/20">
-                {filteredLessons.map((l) => (
-                  <tr key={l.id} className="hover:bg-beige-base/20 transition-colors">
-                    <td className="py-3.5 px-2 font-semibold text-green-dark">{l.title}</td>
-                    <td className="py-3.5 px-2">
-                      <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-green-dark/5 text-green-dark border border-green-mid/10">
-                        {l.subject}
+              <tbody>
+                {lessons.map((less) => (
+                  <tr key={less.id} className="border-b border-teal/5 hover:bg-surface/10 transition-colors">
+                    <td className="p-4 font-semibold text-text-dark">{less.title}</td>
+                    <td className="p-4 text-teal font-bold">{less.subject}</td>
+                    <td className="p-4 text-text-light font-mono">{less.unit}</td>
+                    <td className="p-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                        less.status === "publié" ? "bg-teal/10 text-teal" : "bg-accent/10 text-accent"
+                      }`}>
+                        {less.status}
                       </span>
                     </td>
-                    <td className="py-3.5 px-2 font-mono text-text-mid flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {l.readTime} min
-                    </td>
-                    <td className="py-3.5 px-2 font-mono text-text-mid">{l.questionCount} QCMs</td>
-                    <td className="py-3.5 px-2 text-text-light font-mono text-xs">{l.lastUpdated}</td>
-                    <td className="py-3.5 px-2 text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Link href={`/admin/lessons/${l.id}/edit`}>
-                          <button
-                            className="p-1.5 border border-border-brand text-text-light hover:text-green-mid rounded-sm hover:bg-gray-50 cursor-pointer bg-white"
-                            title="Modifier"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(l.id)}
-                          className="p-1.5 border border-border-brand text-text-light hover:text-red-600 rounded-sm hover:bg-red-50 cursor-pointer bg-white"
-                          title="Supprimer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                    <td className="p-4 text-right flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => startEdit(less)}
+                        className="p-1.5 rounded border border-teal/10 text-teal hover:bg-teal/5"
+                        title="Éditer la leçon"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(less.id)}
+                        className="p-1.5 rounded border border-error/10 text-error hover:bg-error/5"
+                        title="Supprimer la leçon"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
-          {/* Simple Pagination */}
-          <div className="flex items-center justify-between border-t border-border-brand/40 pt-4 mt-6 text-xs text-text-light font-semibold">
-            <span>Affichage de 1 à {filteredLessons.length} sur {filteredLessons.length} leçons</span>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" disabled>Précédent</Button>
-              <Button size="sm" variant="outline" disabled>Suivant</Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    </SidebarLayout>
+        </div>
+      )}
+    </div>
   );
 }

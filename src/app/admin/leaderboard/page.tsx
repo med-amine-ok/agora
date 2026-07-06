@@ -1,116 +1,164 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import SidebarLayout from "@/presentation/components/layout/SidebarLayout";
-import Card from "@/presentation/components/ui/Card";
-import Button from "@/presentation/components/ui/Button";
-import { ChevronLeft, Search, RotateCcw, AlertTriangle, ShieldCheck } from "lucide-react";
+import { 
+  Award, 
+  Search, 
+  RefreshCw, 
+  Download, 
+  Trophy, 
+  Medal,
+  Calendar
+} from "lucide-react";
 
-interface LeaderboardRecord {
+interface TopStudent {
   rank: number;
   name: string;
-  points: number;
-  streak: number;
-  email: string;
+  accuracy: string;
+  xp: number;
+  faculty: string;
 }
 
-export default function AdminLeaderboard() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [records, setRecords] = useState<LeaderboardRecord[]>([
-    { rank: 1, name: "Meriem Bensalah", points: 1540, streak: 12, email: "meriem@agora.dz" },
-    { rank: 2, name: "Dr. Amine Bensalah", points: 1240, streak: 14, email: "amine@agora.dz" },
-    { rank: 3, name: "Youcef Khelifi", points: 1180, streak: 8, email: "youcef@agora.dz" },
-    { rank: 4, name: "Yanis Algiers", points: 980, streak: 10, email: "yanis@agora.dz" },
-    { rank: 5, name: "Lina Chaoui", points: 890, streak: 6, email: "lina@agora.dz" }
-  ]);
+const mockWeeklyLeaderboard: TopStudent[] = [
+  { rank: 1, name: "Sarah Bouhired", accuracy: "94.2%", xp: 850, faculty: "Faculté d'Alger" },
+  { rank: 2, name: "Amine Khelil", accuracy: "79.1%", xp: 720, faculty: "Faculté d'Alger" },
+  { rank: 3, name: "Ryad Merad", accuracy: "72.4%", xp: 540, faculty: "Faculté d'Oran" }
+];
 
-  const handleResetScore = (name: string) => {
-    if (confirm(`Voulez-vous réinitialiser le score Blitz de ${name} ?`)) {
-      setRecords(records.map(r => {
-        if (r.name === name) {
-          return { ...r, points: 0, streak: 0 };
-        }
-        return r;
-      }));
+const mockMonthlyLeaderboard: TopStudent[] = [
+  { rank: 1, name: "Sarah Bouhired", accuracy: "92.1%", xp: 2450, faculty: "Faculté d'Alger" },
+  { rank: 2, name: "Karima Tali", accuracy: "84.5%", xp: 1530, faculty: "Faculté de Constantine" },
+  { rank: 3, name: "Amine Khelil", accuracy: "72.4%", xp: 1240, faculty: "Faculté d'Alger" }
+];
+
+export default function LeaderboardManagementPage() {
+  const [period, setPeriod] = useState<"weekly" | "monthly">("weekly");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [rankings, setRankings] = useState<TopStudent[]>(mockWeeklyLeaderboard);
+
+  const handlePeriodChange = (val: "weekly" | "monthly") => {
+    setPeriod(val);
+    setRankings(val === "weekly" ? mockWeeklyLeaderboard : mockMonthlyLeaderboard);
+  };
+
+  const handleResetSeason = () => {
+    if (confirm("Réinitialiser le classement de la saison actuelle ? Cette action est irréversible et archivera les données.")) {
+      setRankings([]);
+      alert("Classement saisonnier réinitialisé.");
     }
   };
 
-  const filteredRecords = records.filter(r => 
-    r.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleExportRankings = () => {
+    alert("Exportation du classement au format CSV effectuée.");
+  };
+
+  const filteredRankings = rankings.filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <SidebarLayout>
-      <div className="space-y-8 pb-16 select-none">
-        
-        {/* Navigation Actions */}
-        <div className="space-y-2">
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-light hover:text-green-mid transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" /> Retour à l'administration
-          </Link>
-          <h1 className="font-serif text-3xl font-bold text-green-dark">Modération des Classements</h1>
-          <p className="text-text-mid text-sm mt-1">
-            Gérez le classement du Mode Blitz et modérez les scores anormaux ou frauduleux.
+    <div className="space-y-8">
+      {/* Header banner */}
+      <div className="border-b border-teal/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-text-dark flex items-center gap-2">
+            <Trophy className="h-6 w-6 text-accent" /> Classements & Compétitions
+          </h1>
+          <p className="text-xs text-text-light mt-1 uppercase font-mono tracking-wider">
+            Supervisez le classement des étudiants, gérez les saisons de duels et exportez les rapports.
           </p>
         </div>
 
-        {/* Search */}
-        <Card className="p-4 flex gap-4 items-center justify-between border-border-brand/40 text-sm">
-          <div className="relative w-full sm:w-80">
-            <input
-              type="text"
-              placeholder="Rechercher un carabin par nom..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-border-brand rounded-sm text-xs bg-white text-text-dark focus:outline-none"
-            />
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-text-light" />
-          </div>
-        </Card>
-
-        {/* Table */}
-        <Card className="p-6">
-          <div className="overflow-x-auto text-xs sm:text-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border-brand/40 text-xs text-text-light font-mono uppercase pb-2">
-                  <th className="py-3 px-2">Rang</th>
-                  <th className="py-3 px-2">Nom complet</th>
-                  <th className="py-3 px-2">Points Blitz</th>
-                  <th className="py-3 px-2">Série Max</th>
-                  <th className="py-3 px-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-brand/20">
-                {filteredRecords.map((r, idx) => (
-                  <tr key={idx} className="hover:bg-beige-base/20 transition-colors">
-                    <td className="py-3.5 px-2 font-mono font-bold text-green-dark">#{idx + 1}</td>
-                    <td className="py-3.5 px-2">
-                      <span className="font-semibold text-text-dark block">{r.name}</span>
-                      <span className="text-[10px] text-text-light font-mono">{r.email}</span>
-                    </td>
-                    <td className="py-3.5 px-2 font-mono font-bold text-green-mid">{r.points} pts</td>
-                    <td className="py-3.5 px-2 font-mono text-text-mid">🔥 {r.streak}j</td>
-                    <td className="py-3.5 px-2 text-right">
-                      <button
-                        onClick={() => handleResetScore(r.name)}
-                        className="p-1.5 border border-border-brand text-text-light hover:text-amber-600 rounded-sm bg-white cursor-pointer"
-                        title="Réinitialiser le score"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+        <div className="flex gap-2">
+          <button 
+            onClick={handleResetSeason}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-error/10 text-error hover:bg-error/5 text-xs font-semibold transition-all"
+          >
+            <RefreshCw className="h-3.5 w-3.5" /> Réinitialiser la Saison
+          </button>
+          <button 
+            onClick={handleExportRankings}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal text-white-custom hover:bg-teal-dark text-xs font-bold transition-all"
+          >
+            <Download className="h-3.5 w-3.5" /> Exporter CSV
+          </button>
+        </div>
       </div>
-    </SidebarLayout>
+
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border border-teal/10 bg-white-custom p-4 rounded-xl shadow-sm">
+        <div className="flex bg-surface p-1 rounded-lg">
+          <button
+            onClick={() => handlePeriodChange("weekly")}
+            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+              period === "weekly" ? "bg-white-custom text-teal shadow-xs" : "text-text-light hover:text-teal"
+            }`}
+          >
+            Hebdomadaire
+          </button>
+          <button
+            onClick={() => handlePeriodChange("monthly")}
+            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+              period === "monthly" ? "bg-white-custom text-teal shadow-xs" : "text-text-light hover:text-teal"
+            }`}
+          >
+            Mensuel
+          </button>
+        </div>
+
+        <div className="relative w-full sm:w-80">
+          <input
+            type="text"
+            placeholder="Rechercher un candidat..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-4 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark placeholder-text-light/50"
+          />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-text-light/50" />
+        </div>
+      </div>
+
+      {/* Leaderboard list */}
+      <div className="border border-teal/10 bg-white-custom rounded-2xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead>
+              <tr className="border-b border-teal/10 bg-surface/20 text-text-light uppercase tracking-wider font-mono text-[10px]">
+                <th className="p-4 w-16">Rang</th>
+                <th className="p-4">Candidat</th>
+                <th className="p-4">Faculté / Établissement</th>
+                <th className="p-4">Précision Moyenne</th>
+                <th className="p-4 text-right">Points Gagnés</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRankings.length > 0 ? (
+                filteredRankings.map((std) => (
+                  <tr key={std.rank} className="border-b border-teal/5 hover:bg-surface/10 transition-colors">
+                    <td className="p-4">
+                      {std.rank === 1 ? (
+                        <Medal className="h-5 w-5 text-accent" />
+                      ) : std.rank === 2 ? (
+                        <Medal className="h-5 w-5 text-text-light" />
+                      ) : (
+                        <span className="font-mono font-bold text-text-light pl-1">{std.rank}</span>
+                      )}
+                    </td>
+                    <td className="p-4 font-semibold text-text-dark">{std.name}</td>
+                    <td className="p-4 text-text-light">{std.faculty}</td>
+                    <td className="p-4 font-mono font-bold text-teal">{std.accuracy}</td>
+                    <td className="p-4 text-right font-mono font-bold text-accent">{std.xp} XP</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-text-light/50 italic">
+                    Aucun étudiant classé pour cette période
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }

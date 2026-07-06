@@ -1,109 +1,200 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import SidebarLayout from "@/presentation/components/layout/SidebarLayout";
-import Card from "@/presentation/components/ui/Card";
-import Button from "@/presentation/components/ui/Button";
-import { ChevronLeft, Settings, Save, AlertTriangle } from "lucide-react";
+import { 
+  Settings, 
+  Save, 
+  Database, 
+  AlertOctagon, 
+  Shield, 
+  Mail, 
+  Sliders,
+  CheckCircle,
+  RefreshCw
+} from "lucide-react";
 
-export default function AdminSettings() {
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [blitzLimit, setBlitzLimit] = useState(3);
-  const [saving, setSaving] = useState(false);
+export default function SettingsPage() {
+  const [siteName, setSiteName] = useState("Agora 2");
+  const [registrationOpen, setRegistrationOpen] = useState(true);
+  const [blitzTimer, setBlitzTimer] = useState(15);
+  const [maxPlayers, setMaxPlayers] = useState(4);
+  const [saved, setSaved] = useState(false);
+  const [backingUp, setBackingUp] = useState(false);
 
-  const handleSave = () => {
-    setSaving(true);
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleBackup = () => {
+    setBackingUp(true);
     setTimeout(() => {
-      setSaving(false);
-      alert("Paramètres de la plateforme Agora enregistrés !");
-    }, 1000);
+      setBackingUp(false);
+      alert("Sauvegarde de la base de données SQL réussie (agora_backup_2026.sql).");
+    }, 1500);
+  };
+
+  const handleResetDatabase = () => {
+    if (confirm("ATTENTION : Cette action va effacer TOUTES les données utilisateur, les classements et les salons d'Agora. Continuer ?")) {
+      const confirmation = prompt("Veuillez saisir 'DANGER_RESET' pour confirmer :");
+      if (confirmation === "DANGER_RESET") {
+        alert("Base de données réinitialisée aux valeurs par défaut d'usine.");
+      } else {
+        alert("Action annulée.");
+      }
+    }
   };
 
   return (
-    <SidebarLayout>
-      <div className="max-w-3xl mx-auto space-y-8 pb-16 select-none">
-        
-        {/* Navigation Actions */}
-        <div className="space-y-2">
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-light hover:text-green-mid transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" /> Retour à l'administration
-          </Link>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h1 className="font-serif text-3xl font-bold text-green-dark flex items-center gap-2">
-              <Settings className="w-8 h-8 text-green-mid" /> Configuration Générale
-            </h1>
-            <Button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5">
-              <Save className="w-4 h-4" /> {saving ? "Enregistrement..." : "Enregistrer"}
-            </Button>
-          </div>
+    <div className="space-y-8">
+      {/* Header banner */}
+      <div className="border-b border-teal/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-text-dark flex items-center gap-2">
+            <Settings className="h-6 w-6 text-accent" /> Configuration Générale
+          </h1>
+          <p className="text-xs text-text-light mt-1 uppercase font-mono tracking-wider">
+            Configurez les paramètres globaux d'Agora, ajustez les timers de jeu et gérez la base de données.
+          </p>
         </div>
+      </div>
 
-        {/* Settings categories */}
-        <div className="space-y-6">
-          {/* Category 1: Platform safety */}
-          <Card className="p-6 space-y-4">
-            <h3 className="font-bold text-green-dark text-sm border-b border-border-brand/40 pb-2.5">
-              Sécurité et Maintenance
+      <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Config forms */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* General Platform Config */}
+          <div className="p-6 rounded-2xl border border-teal/10 bg-white-custom shadow-sm space-y-4">
+            <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-text-dark flex items-center gap-1.5 border-b border-teal/5 pb-2">
+              <Sliders className="h-4 w-4 text-teal" /> PARAMÈTRES GÉNÉRAUX
             </h3>
 
-            <div className="space-y-4 text-xs sm:text-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <span className="font-semibold text-text-dark block">Mode Maintenance</span>
-                  <p className="text-[11px] text-text-light leading-relaxed">
-                    Bloque l'accès aux pages de révision des étudiants pour effectuer des migrations sur la base de données.
-                  </p>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Nom du site</label>
                 <input
-                  type="checkbox"
-                  checked={maintenanceMode}
-                  onChange={(e) => setMaintenanceMode(e.target.checked)}
-                  className="accent-green-mid w-5 h-5 cursor-pointer shrink-0 mt-1"
+                  type="text"
+                  value={siteName}
+                  onChange={(e) => setSiteName(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark"
+                  required
                 />
               </div>
-
-              {maintenanceMode && (
-                <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-800 rounded-sm flex items-start gap-2">
-                  <AlertTriangle className="w-5 h-5 shrink-0 text-red-600" />
-                  <div>
-                    <strong>Attention :</strong> L'activation de ce flag affichera une page de maintenance pour tous les utilisateurs non-administrateurs.
-                  </div>
-                </div>
-              )}
-            </div>
-          </Card>
-
-          {/* Category 2: Mode constraints */}
-          <Card className="p-6 space-y-4">
-            <h3 className="font-bold text-green-dark text-sm border-b border-border-brand/40 pb-2.5">
-              Limites du Mode Blitz
-            </h3>
-
-            <div className="space-y-4 text-xs sm:text-sm">
-              <div className="space-y-2">
-                <label className="font-semibold text-text-dark block">Nombre maximal de tentatives quotidiennes</label>
-                <p className="text-[11px] text-text-light leading-relaxed mb-2">
-                  Limite le nombre de fois qu'un étudiant non-premium peut démarrer une session Blitz par jour (les serveurs mondiaux de classement étant sollicités).
-                </p>
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Inscriptions</label>
                 <select
-                  value={blitzLimit}
-                  onChange={(e) => setBlitzLimit(Number(e.target.value))}
-                  className="p-2 border border-border-brand bg-white rounded-sm text-xs text-text-dark focus:outline-none"
+                  value={registrationOpen ? "open" : "closed"}
+                  onChange={(e) => setRegistrationOpen(e.target.value === "open")}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark font-semibold"
                 >
-                  <option value={3}>3 tentatives / jour</option>
-                  <option value={5}>5 tentatives / jour</option>
-                  <option value={10}>10 tentatives / jour</option>
-                  <option value={999}>Illimité</option>
+                  <option value="open">Ouvertes à tous les étudiants</option>
+                  <option value="closed">Fermées / Sur invitation</option>
                 </select>
               </div>
             </div>
-          </Card>
+          </div>
+
+          {/* MedQuest Game Rules defaults */}
+          <div className="p-6 rounded-2xl border border-teal/10 bg-white-custom shadow-sm space-y-4">
+            <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-text-dark flex items-center gap-1.5 border-b border-teal/5 pb-2">
+              <Shield className="h-4 w-4 text-accent" /> CONFIGURATION DE JEU (MEDQUEST)
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Durée d'une question Blitz (sec)</label>
+                <input
+                  type="number"
+                  value={blitzTimer}
+                  onChange={(e) => setBlitzTimer(Number(e.target.value))}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark"
+                  min={5}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Capacité max par salon</label>
+                <input
+                  type="number"
+                  value={maxPlayers}
+                  onChange={(e) => setMaxPlayers(Number(e.target.value))}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark"
+                  min={2}
+                  max={8}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Notification / Email config */}
+          <div className="p-6 rounded-2xl border border-teal/10 bg-white-custom shadow-sm space-y-4">
+            <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-text-dark flex items-center gap-1.5 border-b border-teal/5 pb-2">
+              <Mail className="h-4 w-4 text-teal" /> PARAMÈTRES E-MAILS ET ALÈRTES
+            </h3>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-xs text-text-main font-semibold">
+                <input type="checkbox" defaultChecked /> Alerter les administrateurs pour chaque nouveau signalement
+              </label>
+              <label className="flex items-center gap-2 text-xs text-text-main font-semibold">
+                <input type="checkbox" defaultChecked /> Envoyer un résumé hebdomadaire des scores aux étudiants
+              </label>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-teal hover:bg-teal-dark text-white-custom text-xs font-bold transition-all shadow-sm"
+            >
+              <Save className="h-4 w-4" />
+              {saved ? "Modifications Enregistrées !" : "Enregistrer la Configuration"}
+            </button>
+          </div>
         </div>
-      </div>
-    </SidebarLayout>
+
+        {/* Right Column: DB actions & Danger Zone */}
+        <div className="space-y-6">
+          {/* Backups & DB Info */}
+          <div className="p-6 rounded-2xl border border-teal/10 bg-white-custom shadow-sm space-y-4">
+            <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-text-dark flex items-center gap-1.5 border-b border-teal/5 pb-2">
+              <Database className="h-4 w-4 text-teal" /> GESTION DES BACKUPS
+            </h3>
+
+            <p className="text-xs text-text-main leading-relaxed">
+              Effectuez des sauvegardes instantanées de la base de données SQL pour prévenir toute perte de données.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleBackup}
+              disabled={backingUp}
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-teal/10 hover:bg-surface text-xs font-bold text-text-dark transition-all disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 text-teal ${backingUp ? "animate-spin" : ""}`} />
+              {backingUp ? "Sauvegarde en cours..." : "Lancer une Sauvegarde"}
+            </button>
+          </div>
+
+          {/* Danger Zone */}
+          <div className="p-6 rounded-2xl border border-error/20 bg-error/5 shadow-sm space-y-4">
+            <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-error flex items-center gap-1.5 border-b border-error/10 pb-2">
+              <AlertOctagon className="h-4 w-4 text-error" /> ZONE DE DANGER
+            </h3>
+
+            <p className="text-[11px] text-error leading-relaxed">
+              Les actions suivantes détruisent de façon irréversible les enregistrements de production. Soyez vigilant.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleResetDatabase}
+              className="w-full py-2 rounded-xl bg-error text-white-custom hover:bg-error/90 text-xs font-bold transition-all shadow-sm"
+            >
+              Réinitialiser la Plateforme
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }

@@ -1,217 +1,220 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import SidebarLayout from "@/presentation/components/layout/SidebarLayout";
-import Card from "@/presentation/components/ui/Card";
-import Button from "@/presentation/components/ui/Button";
-import { ChevronLeft, Save, Plus, HelpCircle, GripVertical } from "lucide-react";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { 
+  BookOpen, 
+  Plus, 
+  Trash2, 
+  Edit3, 
+  Eye, 
+  EyeOff, 
+  MoveUp, 
+  MoveDown,
+  Activity,
+  Wind,
+  Flame,
+  Stethoscope
+} from "lucide-react";
 
 interface Subject {
   id: string;
   name: string;
-  questionCount: number;
+  iconName: "cardiologie" | "pneumologie" | "gastro" | "pediatrie";
+  lessonsCount: number;
+  visible: boolean;
 }
 
-interface SortableItemProps {
-  id: string;
-  subject: Subject;
-}
+const mockSubjects: Subject[] = [
+  { id: "s1", name: "Cardiologie", iconName: "cardiologie", lessonsCount: 8, visible: true },
+  { id: "s2", name: "Pneumologie", iconName: "pneumologie", lessonsCount: 6, visible: true },
+  { id: "s3", name: "Gastro-entérologie", iconName: "gastro", lessonsCount: 5, visible: true },
+  { id: "s4", name: "Pédiatrie", iconName: "pediatrie", lessonsCount: 4, visible: false }
+];
 
-function SortableItem({ id, subject }: SortableItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id });
+export default function SubjectsPage() {
+  const [subjects, setSubjects] = useState<Subject[]>(mockSubjects);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newIcon, setNewIcon] = useState<"cardiologie" | "pneumologie" | "gastro" | "pediatrie">("cardiologie");
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.6 : 1,
-    zIndex: isDragging ? 50 : 1
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim()) return;
+
+    const newSub: Subject = {
+      id: Math.floor(Math.random() * 1000).toString(),
+      name: newName,
+      iconName: newIcon,
+      lessonsCount: 0,
+      visible: true
+    };
+
+    setSubjects(prev => [...prev, newSub]);
+    setNewName("");
+    setShowAddForm(false);
   };
 
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-center justify-between p-4 bg-white border border-border-brand/40 rounded-sm hover:border-green-mid hover:shadow-sm select-none"
-    >
-      <div className="flex items-center gap-3">
-        {/* Handle */}
-        <button
-          {...attributes}
-          {...listeners}
-          className="p-1 text-text-light hover:text-text-dark cursor-grab active:cursor-grabbing bg-transparent border-none"
-          type="button"
-          aria-label="Faire glisser pour réordonner"
-        >
-          <GripVertical className="w-4 h-4 shrink-0" />
-        </button>
-        <span className="text-sm font-bold text-green-dark">{subject.name}</span>
-      </div>
+  const handleToggleVisibility = (id: string) => {
+    setSubjects(prev => prev.map(s => s.id === id ? { ...s, visible: !s.visible } : s));
+  };
 
-      <div className="flex items-center gap-4 text-xs text-text-mid font-mono">
-        <span className="flex items-center gap-1">
-          <HelpCircle className="w-3.5 h-3.5" /> {subject.questionCount} QCMs
-        </span>
-      </div>
-    </div>
-  );
-}
-
-export default function AdminSubjects() {
-  const [subjects, setSubjects] = useState<Subject[]>([
-    { id: "s1", name: "Cardiologie", questionCount: 420 },
-    { id: "s2", name: "Anatomie", questionCount: 280 },
-    { id: "s3", name: "Pédiatrie", questionCount: 350 },
-    { id: "s4", name: "Neurologie", questionCount: 190 },
-    { id: "s5", name: "Infectiologie", questionCount: 210 },
-    { id: "s6", name: "Gynécologie Obstétrique", questionCount: 150 }
-  ]);
-
-  const [saving, setSaving] = useState(false);
-  const [newSubjectName, setNewSubjectName] = useState("");
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // Allow regular clicks/buttons inside the card
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setSubjects((items) => {
-        const oldIndex = items.findIndex((i) => i.id === active.id);
-        const newIndex = items.findIndex((i) => i.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+  const handleDelete = (id: string) => {
+    if (confirm("Supprimer cette matière ? Les leçons associées seront orphelines.")) {
+      setSubjects(prev => prev.filter(s => s.id !== id));
     }
   };
 
-  const handleSave = () => {
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      alert("Ordre des matières enregistré avec succès !");
-    }, 1200);
+  const moveItem = (index: number, direction: "up" | "down") => {
+    const updated = [...subjects];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= updated.length) return;
+
+    // Swap
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+    setSubjects(updated);
   };
 
-  const handleAddSubject = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSubjectName.trim()) return;
-
-    const newSub: Subject = {
-      id: `s-${Date.now()}`,
-      name: newSubjectName.trim(),
-      questionCount: 0
-    };
-
-    setSubjects([...subjects, newSub]);
-    setNewSubjectName("");
+  const renderIcon = (iconName: string) => {
+    switch (iconName) {
+      case "cardiologie":
+        return <Activity className="h-5 w-5 text-accent" />;
+      case "pneumologie":
+        return <Wind className="h-5 w-5 text-teal" />;
+      case "gastro":
+        return <Flame className="h-5 w-5 text-accent" />;
+      default:
+        return <Stethoscope className="h-5 w-5 text-teal" />;
+    }
   };
 
   return (
-    <SidebarLayout>
-      <div className="max-w-3xl mx-auto space-y-8 pb-16">
-        
-        {/* Navigation & Actions */}
-        <div className="space-y-2">
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-light hover:text-green-mid transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" /> Retour à l'administration
-          </Link>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="font-serif text-3xl font-bold text-green-dark">Gestion des Matières</h1>
-              <p className="text-text-mid text-sm mt-1">
-                Organisez l'ordre d'affichage des spécialités médicales à l'aide du glisser-déposer.
-              </p>
-            </div>
-            <Button onClick={handleSave} disabled={saving} className="flex items-center gap-1.5 self-start sm:self-auto">
-              <Save className="w-4 h-4" /> {saving ? "Enregistrement..." : "Enregistrer l'ordre"}
-            </Button>
-          </div>
+    <div className="space-y-8">
+      {/* Header banner */}
+      <div className="border-b border-teal/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-text-dark flex items-center gap-2">
+            <BookOpen className="h-6 w-6 text-accent" /> Gestion des Matières
+          </h1>
+          <p className="text-xs text-text-light mt-1 uppercase font-mono tracking-wider">
+            Ajoutez de nouvelles matières, activez leur visibilité et organisez l'ordre d'apprentissage.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          {/* Left panel: Add subject (1/3) */}
-          <div className="md:col-span-1">
-            <Card className="p-6 space-y-4 border-border-brand/40">
-              <h3 className="font-bold text-green-dark text-sm border-b border-border-brand/40 pb-2.5">
-                Nouvelle Matière
-              </h3>
-
-              <form onSubmit={handleAddSubject} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="block text-xs font-bold text-text-dark uppercase">Nom de la spécialité</label>
-                  <input
-                    type="text"
-                    placeholder="ex: Gastro-entérologie"
-                    value={newSubjectName}
-                    onChange={(e) => setNewSubjectName(e.target.value)}
-                    className="w-full p-2 border border-border-brand rounded-sm text-xs bg-white text-text-dark focus:outline-none focus:border-green-mid"
-                    required
-                  />
-                </div>
-                <Button type="submit" size="sm" className="w-full flex items-center justify-center gap-1">
-                  <Plus className="w-3.5 h-3.5" /> Créer
-                </Button>
-              </form>
-            </Card>
-          </div>
-
-          {/* Right panel: Sortable List (2/3) */}
-          <div className="md:col-span-2 space-y-4">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={subjects.map((s) => s.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="space-y-3">
-                  {subjects.map((sub) => (
-                    <SortableItem key={sub.id} id={sub.id} subject={sub} />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          </div>
-        </div>
+        <button 
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal text-white-custom hover:bg-teal-dark text-xs font-bold transition-all"
+        >
+          <Plus className="h-4 w-4" /> Nouvelle Matière
+        </button>
       </div>
-    </SidebarLayout>
+
+      {/* Creation form */}
+      {showAddForm && (
+        <form onSubmit={handleCreate} className="p-6 rounded-2xl border border-teal/10 bg-white-custom shadow-sm space-y-4 max-w-md">
+          <h3 className="text-xs font-mono font-bold text-text-dark uppercase">Créer une matière médicale</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] uppercase font-mono text-text-light font-bold">Nom</label>
+              <input
+                type="text"
+                placeholder="Ex. Cardiologie Clinique"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark placeholder-text-light/50"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] uppercase font-mono text-text-light font-bold">Icône indicative</label>
+              <select
+                value={newIcon}
+                onChange={(e) => setNewIcon(e.target.value as any)}
+                className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-white-custom text-xs outline-none focus:border-teal text-text-dark"
+              >
+                <option value="cardiologie">Cardiologie (Oscilloscope)</option>
+                <option value="pneumologie">Pneumologie (Vent)</option>
+                <option value="gastro">Gastro-entérologie (Feu)</option>
+                <option value="pediatrie">Autre (Stéthoscope)</option>
+              </select>
+            </div>
+
+            <div className="flex gap-2 justify-end pt-2">
+              <button 
+                type="button"
+                onClick={() => setShowAddForm(false)}
+                className="px-3 py-1.5 rounded-lg border border-teal/10 hover:bg-surface text-xs font-semibold text-text-dark"
+              >
+                Annuler
+              </button>
+              <button 
+                type="submit"
+                className="px-4 py-1.5 rounded-lg bg-teal text-white-custom hover:bg-teal-dark text-xs font-bold"
+              >
+                Ajouter
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+
+      {/* Subjects re-orderable list */}
+      <div className="space-y-3">
+        {subjects.map((sub, index) => (
+          <div 
+            key={sub.id} 
+            className={`p-4 rounded-xl border border-teal/10 bg-white-custom flex items-center justify-between gap-4 shadow-sm hover:border-teal/20 transition-all ${
+              !sub.visible ? "opacity-75 bg-surface/10" : ""
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-surface/50 border border-teal/5">
+                {renderIcon(sub.iconName)}
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-text-dark">{sub.name}</h3>
+                <span className="text-[10px] text-text-light font-mono font-bold uppercase">{sub.lessonsCount} Leçons</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Order management buttons */}
+              <button 
+                onClick={() => moveItem(index, "up")}
+                disabled={index === 0}
+                className="p-1 rounded text-text-light hover:bg-surface disabled:opacity-30"
+              >
+                <MoveUp className="h-3.5 w-3.5" />
+              </button>
+              <button 
+                onClick={() => moveItem(index, "down")}
+                disabled={index === subjects.length - 1}
+                className="p-1 rounded text-text-light hover:bg-surface disabled:opacity-30"
+              >
+                <MoveDown className="h-3.5 w-3.5" />
+              </button>
+
+              {/* Visibility and delete */}
+              <button 
+                onClick={() => handleToggleVisibility(sub.id)}
+                className={`p-1.5 rounded border ${sub.visible ? "border-teal/10 text-teal hover:bg-teal/5" : "border-text-light/10 text-text-light hover:bg-surface"}`}
+                title={sub.visible ? "Rendre invisible" : "Rendre visible"}
+              >
+                {sub.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+              </button>
+
+              <button 
+                onClick={() => handleDelete(sub.id)}
+                className="p-1.5 rounded border border-error/10 text-error hover:bg-error/5"
+                title="Supprimer la matière"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

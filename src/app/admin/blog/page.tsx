@@ -1,108 +1,318 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import SidebarLayout from "@/presentation/components/layout/SidebarLayout";
-import Card from "@/presentation/components/ui/Card";
-import Button from "@/presentation/components/ui/Button";
-import { ChevronLeft, Plus, Trash2, Edit2, Calendar } from "lucide-react";
+import { 
+  FileText, 
+  Plus, 
+  Trash2, 
+  Edit3, 
+  Upload, 
+  X,
+  Tag,
+  BookOpen
+} from "lucide-react";
+import { useArticlesStore, Article } from "@/store/useArticlesStore";
 
-interface AdminPost {
-  slug: string;
-  title: string;
-  category: string;
-  author: string;
-  date: string;
-}
+export default function BlogCMSPage() {
+  const { articles, addArticle, updateArticle, deleteArticle } = useArticlesStore();
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingPost, setEditingPost] = useState<Article | null>(null);
 
-export default function AdminBlog() {
-  const [posts, setPosts] = useState<AdminPost[]>([
-    { slug: "cas-clinique-sca-st-plus-vs-st-moins", title: "Analyse d'un Cas Clinique de Cardiologie : SCA ST+ vs ST-", category: "Cas Clinique", author: "Dr. Amine Bensalah", date: "12 Juin 2026" },
-    { slug: "preparer-concours-residanat-sans-burnout", title: "Comment préparer le concours de Résidanat sans faire de burnout", category: "Conseils d'Études", author: "Meriem Bensalah", date: "05 Juin 2026" },
-    { slug: "inhibiteurs-sglt2-insuffisance-cardiaque", title: "Les nouveaux inhibiteurs de SGLT2 dans l'insuffisance cardiaque", category: "Actualités Médicales", author: "Dr. Lina Chaoui", date: "28 Mai 2026" }
-  ]);
+  // Editor states
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Cardiologie");
+  const [tagsInput, setTagsInput] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [coverImage, setCoverImage] = useState("");
+  const [summaryInput, setSummaryInput] = useState("");
+  const [notesInput, setNotesInput] = useState("");
+  const [content, setContent] = useState("");
+  const [readTime, setReadTime] = useState("5 min");
 
-  const handleDelete = (slug: string) => {
-    if (confirm("Voulez-vous vraiment supprimer cet article de blog ?")) {
-      setPosts(posts.filter(p => p.slug !== slug));
+  const startCreate = () => {
+    setEditingPost(null);
+    setTitle("");
+    setCategory("Cardiologie");
+    setTagsInput("");
+    setExcerpt("");
+    setCoverImage("https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80");
+    setSummaryInput("");
+    setNotesInput("");
+    setContent("");
+    setReadTime("5 min");
+    setShowEditor(true);
+  };
+
+  const startEdit = (post: Article) => {
+    setEditingPost(post);
+    setTitle(post.title);
+    setCategory(post.category);
+    setTagsInput(post.tags.join(", "));
+    setExcerpt(post.excerpt);
+    setCoverImage(post.coverImage);
+    setSummaryInput(post.summaryPoints.join("\n"));
+    setNotesInput(post.medicalNotes.join("\n"));
+    setContent(post.content);
+    setReadTime(post.readTime);
+    setShowEditor(true);
+  };
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    const parsedTags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
+    const parsedSummary = summaryInput.split("\n").map(s => s.trim()).filter(Boolean);
+    const parsedNotes = notesInput.split("\n").map(n => n.trim()).filter(Boolean);
+
+    const payload = {
+      title,
+      category,
+      tags: parsedTags,
+      excerpt,
+      coverImage,
+      summaryPoints: parsedSummary,
+      medicalNotes: parsedNotes,
+      content,
+      readTime,
+      author: "Dr. Belkacem",
+    };
+
+    if (editingPost) {
+      updateArticle(editingPost.id, payload);
+    } else {
+      addArticle(payload);
+    }
+
+    setShowEditor(false);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Supprimer cet article ?")) {
+      deleteArticle(id);
     }
   };
 
   return (
-    <SidebarLayout>
-      <div className="space-y-8 pb-16 select-none">
-        
-        {/* Navigation Actions */}
-        <div className="space-y-2">
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-light hover:text-green-mid transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" /> Retour à l'administration
-          </Link>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="font-serif text-3xl font-bold text-green-dark">Gestion des Articles du Blog</h1>
-              <p className="text-text-mid text-sm mt-1">
-                Publiez des cas cliniques, actualités scientifiques et conseils méthodologiques pour les étudiants.
-              </p>
-            </div>
-            <Button className="flex items-center gap-1.5 self-start sm:self-auto">
-              <Plus className="w-4 h-4" /> Nouvel Article
-            </Button>
-          </div>
+    <div className="space-y-8">
+      {/* Header banner */}
+      <div className="border-b border-teal/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-teal-dark flex items-center gap-2">
+            <FileText className="h-6 w-6 text-accent" /> Gestion du CMS Articles
+          </h1>
+          <p className="text-xs text-text-light mt-1 uppercase font-mono tracking-wider">
+            Publiez des articles de révision clinique, organisez les étiquettes et gérez l'éditorial d'Agora.
+          </p>
         </div>
 
-        {/* Table of posts */}
-        <Card className="p-6">
-          <div className="overflow-x-auto text-xs sm:text-sm">
-            <table className="w-full text-left border-collapse">
+        {!showEditor && (
+          <button 
+            onClick={startCreate}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal text-white-custom hover:bg-teal-dark text-xs font-bold transition-all cursor-pointer"
+          >
+            <Plus className="h-4 w-4" /> Nouvel article
+          </button>
+        )}
+      </div>
+
+      {/* Editor Modal */}
+      {showEditor && (
+        <form onSubmit={handleSave} className="p-6 rounded-2xl border border-teal/10 bg-white-custom shadow-sm space-y-4 max-w-3xl">
+          <div className="flex items-center justify-between border-b border-teal/10 pb-3">
+            <h3 className="font-display text-sm font-bold text-text-dark">
+              {editingPost ? `Modifier l'article : ${editingPost.title}` : "Nouvel article"}
+            </h3>
+            <button 
+              type="button" 
+              onClick={() => setShowEditor(false)}
+              className="text-text-light hover:text-teal cursor-pointer"
+            >
+              <X className="h-4.5 w-4.5" />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Titre de l'article</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Catégorie</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark"
+                >
+                  <option value="Cardiologie">Cardiologie</option>
+                  <option value="Pneumologie">Pneumologie</option>
+                  <option value="Pédiatrie">Pédiatrie</option>
+                  <option value="Méthodologie">Méthodologie</option>
+                  <option value="Physiologie">Physiologie</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Étiquettes (séparées par des virgules)</label>
+                <input
+                  type="text"
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                  placeholder="Ex. ECG, Résidanat"
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Temps de lecture</label>
+                <input
+                  type="text"
+                  value={readTime}
+                  onChange={(e) => setReadTime(e.target.value)}
+                  placeholder="Ex. 6 min"
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Image de couverture (URL)</label>
+                <input
+                  type="text"
+                  value={coverImage}
+                  onChange={(e) => setCoverImage(e.target.value)}
+                  placeholder="URL d'image Unsplash..."
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] uppercase font-mono text-text-light font-bold">Résumé / Description de l'article (Excerpt)</label>
+              <textarea
+                rows={2}
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+                placeholder="Court résumé visible sur la grille..."
+                className="w-full mt-1 p-2.5 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark font-sans"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Points Clés (Un par ligne)</label>
+                <textarea
+                  rows={3}
+                  value={summaryInput}
+                  onChange={(e) => setSummaryInput(e.target.value)}
+                  placeholder="Point clé 1&#10;Point clé 2"
+                  className="w-full mt-1 p-2 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark font-sans"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] uppercase font-mono text-text-light font-bold">Notes Cliniques (Une par ligne)</label>
+                <textarea
+                  rows={3}
+                  value={notesInput}
+                  onChange={(e) => setNotesInput(e.target.value)}
+                  placeholder="Note diagnostique 1&#10;Alerte thérapeutique 2"
+                  className="w-full mt-1 p-2 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark font-sans"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] uppercase font-mono text-text-light font-bold">Corps de l'article</label>
+              <textarea
+                rows={8}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Rédigez le contenu complet de l'article..."
+                className="w-full mt-1 p-2.5 rounded-lg border border-teal/15 bg-[#F5FAFA] text-xs outline-none focus:border-teal text-text-dark font-sans"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end border-t border-teal/10 pt-4">
+              <button 
+                type="button"
+                onClick={() => setShowEditor(false)}
+                className="px-4 py-2 rounded-lg border border-teal/10 hover:bg-surface text-xs font-semibold text-text-dark cursor-pointer"
+              >
+                Annuler
+              </button>
+              <button 
+                type="submit"
+                className="px-6 py-2 bg-teal text-white-custom hover:bg-teal-dark rounded-lg text-xs font-bold shadow-sm cursor-pointer"
+              >
+                Sauvegarder l'Article
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+
+      {/* Blog list */}
+      {!showEditor && (
+        <div className="border border-teal/10 bg-white-custom rounded-2xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
               <thead>
-                <tr className="border-b border-border-brand/40 text-xs text-text-light font-mono uppercase pb-2">
-                  <th className="py-3 px-2">Titre de l'article</th>
-                  <th className="py-3 px-2">Catégorie</th>
-                  <th className="py-3 px-2">Auteur</th>
-                  <th className="py-3 px-2">Date de publication</th>
-                  <th className="py-3 px-2 text-right">Actions</th>
+                <tr className="border-b border-teal/10 bg-[#F5FAFA] text-text-light uppercase tracking-wider font-mono text-[10px]">
+                  <th className="p-4">Titre</th>
+                  <th className="p-4">Catégorie</th>
+                  <th className="p-4">Étiquettes (Tags)</th>
+                  <th className="p-4">Auteur</th>
+                  <th className="p-4">Likes</th>
+                  <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-brand/20">
-                {posts.map((p) => (
-                  <tr key={p.slug} className="hover:bg-beige-base/20 transition-colors">
-                    <td className="py-3.5 px-2 font-semibold text-green-dark leading-snug">{p.title}</td>
-                    <td className="py-3.5 px-2">
-                      <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-green-dark/5 text-green-dark border border-green-mid/10">
-                        {p.category}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-2 text-text-mid font-semibold">{p.author}</td>
-                    <td className="py-3.5 px-2 text-text-light font-mono flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" /> {p.date}
-                    </td>
-                    <td className="py-3.5 px-2 text-right">
-                      <div className="flex gap-2 justify-end">
-                        <button
-                          className="p-1.5 border border-border-brand text-text-light hover:text-green-mid rounded-sm bg-white"
-                          title="Modifier"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.slug)}
-                          className="p-1.5 border border-border-brand text-text-light hover:text-red-600 rounded-sm bg-white cursor-pointer"
-                          title="Supprimer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+              <tbody>
+                {articles.map((post) => (
+                  <tr key={post.id} className="border-b border-teal/5 hover:bg-surface/10 transition-colors">
+                    <td className="p-4 font-semibold text-text-dark">{post.title}</td>
+                    <td className="p-4 text-teal font-bold">{post.category}</td>
+                    <td className="p-4">
+                      <div className="flex flex-wrap gap-1">
+                        {post.tags.map((t, i) => (
+                          <span key={i} className="px-1.5 py-0.5 rounded bg-surface/50 border border-teal/5 text-[9px] text-text-main font-semibold flex items-center gap-0.5">
+                            <Tag className="h-2.5 w-2.5 text-accent" /> {t}
+                          </span>
+                        ))}
                       </div>
+                    </td>
+                    <td className="p-4 text-text-light">{post.author}</td>
+                    <td className="p-4 text-text-light font-mono font-semibold">{post.likes}</td>
+                    <td className="p-4 text-right flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => startEdit(post)}
+                        className="p-1.5 rounded border border-teal/10 text-teal hover:bg-teal/5 cursor-pointer"
+                        title="Éditer l'article"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(post.id)}
+                        className="p-1.5 rounded border border-error/10 text-error hover:bg-error/5 cursor-pointer"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </Card>
-      </div>
-    </SidebarLayout>
+        </div>
+      )}
+    </div>
   );
 }
+
