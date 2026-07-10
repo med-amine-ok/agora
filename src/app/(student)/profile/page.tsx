@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useAgoraStore } from "@/store/useAgoraStore";
+import { useFlashcardStore } from "@/lib/store/flashcardStore";
+import ProgressTracker from "@/components/stats/ProgressTracker";
+import SubjectProgressTable from "@/components/stats/SubjectProgressTable";
 import { Award, BookOpen, Clock, Flame, GraduationCap, Trophy, User } from "lucide-react";
 
 export default function ProfilePage() {
   const { user } = useAgoraStore();
+  const { flashcards, progress } = useFlashcardStore();
   const [university, setUniversity] = useState("Université d'Alger 1 (Faculté de Médecine)");
   const [year, setYear] = useState("4ème Année - Externe");
 
@@ -15,6 +19,25 @@ export default function ProfilePage() {
     { title: "Champion du Blitz", desc: "Top 3 dans une arène Blitz hebdomadaire", icon: "🏆" },
     { title: "Clinicien Précis", desc: "A atteint 90% de précision sur 50 questions", icon: "🎯" },
   ];
+
+  // Dynamically calculate flashcard statistics
+  const flashcardStats = useMemo(() => {
+    const total = flashcards.filter(c => c.status === "approved").length;
+    
+    // Cards considered mastered if reviewed at least once and interval >= 4
+    const mastered = Object.values(progress).filter(p => p.interval >= 4).length;
+    
+    // Cards due today
+    const now = new Date();
+    const due = flashcards.filter(c => {
+      if (c.status !== "approved") return false;
+      const prog = progress[c.id];
+      if (!prog) return true; // new card is due
+      return new Date(prog.nextReviewAt) <= now;
+    }).length;
+
+    return { total, mastered, due };
+  }, [flashcards, progress]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
@@ -81,6 +104,29 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Progress Trackers */}
+      <div className="space-y-6 pt-4">
+        <h2 className="text-lg font-bold font-display text-text-dark border-b border-teal/10 pb-2">
+          Suivi de l'Apprentissage & Performance
+        </h2>
+        <ProgressTracker 
+          lessonsRead={8}
+          totalLessons={24}
+          modulesRead={15}
+          totalModules={40}
+          qcmsAnswered={412}
+          qcmPrecision={84}
+          flashcardsMastered={flashcardStats.mastered}
+          totalFlashcards={flashcardStats.total}
+          flashcardsDueToday={flashcardStats.due}
+        />
+        
+        <div className="space-y-2">
+          <h3 className="text-sm font-bold text-text-dark">Progression détaillée par matière</h3>
+          <SubjectProgressTable />
         </div>
       </div>
     </div>

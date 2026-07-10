@@ -80,9 +80,12 @@ export default function ArticleDetailPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
         {/* Navigation back button */}
-        <Link href="/articles" className="inline-flex items-center gap-1.5 text-xs font-bold text-teal hover:text-teal-dark transition-colors font-mono">
-          <ArrowLeft className="h-3.5 w-3.5" /> TOUS LES ARTICLES
-        </Link>
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-teal hover:text-teal-dark transition-colors font-mono cursor-pointer"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> RETOUR
+        </button>
 
         {/* Article Meta Header */}
         <div className="space-y-6">

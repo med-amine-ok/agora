@@ -46,27 +46,31 @@ export default function PublicLayout({
     { name: "Articles", href: "/articles" },
   ];
 
+  const isArticlesPage = pathname.startsWith("/articles");
+
   return (
     <div className="min-h-screen flex flex-col bg-white-custom font-sans antialiased text-text">
       {/* Public Navbar */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          isScrolled
-            ? "bg-white-custom/85 backdrop-blur-md border-b border-border shadow-sm py-3"
-            : "bg-transparent py-5"
-        }`}
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-dark text-white-custom transition-all group-hover:bg-teal">
-                <Activity className="h-5 w-5 stroke-[2] text-accent animate-pulse" />
-              </div>
-              <span className="font-display text-xl font-bold tracking-tight text-teal-dark group-hover:text-teal transition-all">
-                Agora
-              </span>
-            </Link>
+      {!isArticlesPage && (
+        <header
+          className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+            isScrolled
+              ? "bg-white-custom/85 backdrop-blur-md border-b border-border shadow-sm py-3"
+              : "bg-transparent py-5"
+          }`}
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              {/* Logo */}
+              <Link href="/" className="flex items-center gap-2 group">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-dark text-white-custom transition-all group-hover:bg-teal">
+                  <Activity className="h-5 w-5 stroke-[2] text-accent animate-pulse" />
+                </div>
+                <span className="font-display text-xl font-bold tracking-tight text-teal-dark group-hover:text-teal transition-all">
+                  Agora
+                </span>
+              </Link>
+
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
@@ -179,7 +183,8 @@ export default function PublicLayout({
             </motion.div>
           )}
         </AnimatePresence>
-      </header>
+        </header>
+      )}
 
       {/* Main content wrapper */}
       <div className="flex-grow flex flex-col">{children}</div>

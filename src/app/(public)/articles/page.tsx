@@ -2,13 +2,15 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Clock, Calendar, ArrowRight, Heart, BookOpen, AlertCircle } from "lucide-react";
+import { Search, Clock, Calendar, ArrowRight, ArrowLeft, Heart, BookOpen, AlertCircle } from "lucide-react";
 import { useArticlesStore } from "@/store/useArticlesStore";
 
 const CATEGORIES = ["Tous", "Cardiologie", "Pneumologie", "Pédiatrie", "Méthodologie", "Physiologie"];
 
 export default function ArticlesPage() {
+  const router = useRouter();
   const { articles } = useArticlesStore();
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,6 +42,14 @@ export default function ArticlesPage() {
   return (
     <div className="min-h-screen bg-[#F5FAFA] pt-24 pb-16 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        {/* Navigation back button */}
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-teal hover:text-teal-dark transition-colors font-mono cursor-pointer"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> RETOUR
+        </button>
+
         
         {/* Page title and description */}
         <div className="text-center space-y-4">

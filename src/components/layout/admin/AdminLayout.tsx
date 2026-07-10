@@ -40,6 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Matières", href: "/admin/subjects", icon: <BookOpen className="h-4 w-4" /> },
     { name: "Leçons", href: "/admin/lessons", icon: <FileText className="h-4 w-4" /> },
     { name: "Questions QCM", href: "/admin/questions", icon: <HelpCircle className="h-4 w-4" /> },
+    { name: "Flashcards", href: "/admin/flashcards", icon: <ShieldCheck className="h-4 w-4" /> },
     { name: "Salons Blitz", href: "/admin/rooms", icon: <Activity className="h-4 w-4" /> },
     { name: "Classements", href: "/admin/leaderboard", icon: <Trophy className="h-4 w-4" /> },
     { name: "Signalements", href: "/admin/reports", icon: <AlertTriangle className="h-4 w-4" /> },

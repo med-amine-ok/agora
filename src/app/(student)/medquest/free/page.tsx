@@ -3,8 +3,8 @@
 import React, { useState, useMemo, Suspense } from "react";
 import Footer from "@/components/Footer";
 import ECGBackground from "@/components/ECGBackground";
-import { motion } from "framer-motion";
-import { Compass, CheckCircle2, AlertCircle, ArrowLeft, ArrowRight, Sparkles, BookOpen, HelpCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Compass, CheckCircle2, AlertCircle, ArrowLeft, ArrowRight, Sparkles, BookOpen, HelpCircle, RotateCcw, Award, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { LESSONS_DATA, getSubjectById, getLessonMatch } from "../../lessons/mockLessonsData";
@@ -21,8 +21,8 @@ interface CaseQuestion {
 const mockFreeCases: Record<string, CaseQuestion[]> = {
   Cardiologie: [
     {
-      caseTitle: "Présentation clinique : douleur thoracique aigu",
-      caseDetails: "Un homme de 58 ans se présente aux urgences avec une oppression rétrosternale irradiant vers le bras gauche. La douleur a débuté il y a 45 minutes lors d'un effort modéré. Il est diaphoresique, avec une pression artérielle de 145/90 mmHg et une fréquence cardiaque de 92 bpm. L'ECG 12 dérivations révèle un sus-décalage du ST de 2,5 mm en V2, V3 et V4.",
+      caseTitle: "Présentation clinique : douleur thoracique aiguë",
+      caseDetails: "Un homme de 58 ans se présente aux urgences avec une oppression rétrosternale irradiant vers le bras gauche. La douleur a débuté il y a 45 minutes lors d'un effort modéré. Il est diaphorétique, avec une pression artérielle de 145/90 mmHg et une fréquence cardiaque de 92 bpm. L'ECG 12 dérivations révèle un sus-décalage du ST de 2,5 mm en V2, V3 et V4.",
       question: "D'après l'ECG, quel territoire artériel est le plus probablement occlus ?",
       options: [
         "Artère circonflexe (Cx)",
@@ -66,6 +66,13 @@ const mockFreeCases: Record<string, CaseQuestion[]> = {
   ]
 };
 
+interface UserAnswer {
+  caseQuestion: CaseQuestion;
+  selectedOption: number;
+  isCorrect: boolean;
+  questionIndex: number;
+}
+
 function FreePracticeGame() {
   const searchParams = useSearchParams();
 
@@ -80,6 +87,9 @@ function FreePracticeGame() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [answers, setAnswers] = useState<UserAnswer[]>([]);
+  const [showSummary, setShowSummary] = useState(false);
+  const [expandedSummaryIndex, setExpandedSummaryIndex] = useState<number | null>(null);
 
   // Load active subject details
   const subject = useMemo(() => {
@@ -109,16 +119,201 @@ function FreePracticeGame() {
 
   const handleVerify = () => {
     if (selectedOption === null) return;
-    setIsCorrect(selectedOption === currentCase.correctIndex);
+    const correct = selectedOption === currentCase.correctIndex;
+    setIsCorrect(correct);
     setIsAnswered(true);
+
+    // Save answer
+    setAnswers((prev) => [
+      ...prev,
+      {
+        caseQuestion: currentCase,
+        selectedOption: selectedOption,
+        isCorrect: correct,
+        questionIndex: currentIdx + 1,
+      },
+    ]);
   };
 
   const handleNext = () => {
+    if (currentIdx + 1 >= questionCount) {
+      setShowSummary(true);
+      return;
+    }
     setSelectedOption(null);
     setIsAnswered(false);
     setIsCorrect(false);
-    setCurrentIdx((prev) => (prev + 1) % questionCount);
+    setCurrentIdx((prev) => prev + 1);
   };
+
+  const handleRestart = () => {
+    setCurrentIdx(0);
+    setSelectedOption(null);
+    setIsAnswered(false);
+    setIsCorrect(false);
+    setAnswers([]);
+    setShowSummary(false);
+    setExpandedSummaryIndex(null);
+  };
+
+  const scorePercent = useMemo(() => {
+    if (answers.length === 0) return 0;
+    const correctCount = answers.filter((a) => a.isCorrect).length;
+    return Math.round((correctCount / answers.length) * 100);
+  }, [answers]);
+
+  if (showSummary) {
+    const correctCount = answers.filter((a) => a.isCorrect).length;
+    const incorrectCount = answers.length - correctCount;
+
+    return (
+      <>
+        <ECGBackground />
+        <main className="relative z-10 flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 w-full space-y-8">
+          
+          {/* Header Summary */}
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-teal/10 text-teal border border-teal/20 mb-2">
+              <Award className="h-8 w-8" />
+            </div>
+            <h1 className="font-display text-3xl font-black text-text-dark">
+              Session d'entraînement terminée !
+            </h1>
+            <p className="text-sm text-text-light max-w-md mx-auto">
+              Félicitations pour avoir complété les {questionCount} diagnostics dans le module <span className="text-teal font-semibold">{subject.name}</span>.
+            </p>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-2xl border border-teal/10 p-5 text-center space-y-1 shadow-sm">
+              <span className="text-xs font-bold text-text-light uppercase tracking-wider">Score Global</span>
+              <p className="font-mono text-3xl font-black text-teal-dark">{scorePercent}%</p>
+              <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden mt-2">
+                <div className="h-full bg-teal" style={{ width: `${scorePercent}%` }} />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-teal/10 p-5 text-center space-y-1 shadow-sm">
+              <span className="text-xs font-bold text-text-light uppercase tracking-wider">Bonnes réponses</span>
+              <p className="font-mono text-3xl font-black text-success">{correctCount} / {answers.length}</p>
+              <span className="text-[10px] font-semibold text-text-light">Diagnostics corrects</span>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-teal/10 p-5 text-center space-y-1 shadow-sm">
+              <span className="text-xs font-bold text-text-light uppercase tracking-wider">Erreurs commises</span>
+              <p className="font-mono text-3xl font-black text-error">{incorrectCount} / {answers.length}</p>
+              <span className="text-[10px] font-semibold text-text-light">À revoir en priorité</span>
+            </div>
+          </div>
+
+          {/* Detailed breakdown of answers */}
+          <div className="bg-white rounded-2xl border border-teal/10 p-6 shadow-md space-y-4">
+            <h2 className="font-display text-lg font-bold text-text-dark pb-3 border-b border-teal/10">
+              Rapport détaillé des diagnostics
+            </h2>
+            
+            <div className="space-y-3">
+              {answers.map((ans, idx) => (
+                <div 
+                  key={idx}
+                  className="rounded-xl border border-teal/10 overflow-hidden"
+                >
+                  <button
+                    onClick={() => setExpandedSummaryIndex(expandedSummaryIndex === idx ? null : idx)}
+                    className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold hover:bg-surface/10 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      {ans.isCorrect ? (
+                        <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-error shrink-0" />
+                      )}
+                      <div>
+                        <span className="text-[10px] font-mono uppercase text-text-light">Diagnostic #{ans.questionIndex}</span>
+                        <p className="text-text-dark font-bold line-clamp-1">{ans.caseQuestion.caseTitle}</p>
+                      </div>
+                    </div>
+                    {expandedSummaryIndex === idx ? <ChevronUp className="h-4.5 w-4.5 text-text-light" /> : <ChevronDown className="h-4.5 w-4.5 text-text-light" />}
+                  </button>
+
+                  <AnimatePresence>
+                    {expandedSummaryIndex === idx && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="bg-surface/5 border-t border-teal/5 p-4 space-y-3 text-xs"
+                      >
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-text-light tracking-wider">Détails du cas :</span>
+                          <p className="text-text-dark leading-relaxed mt-1">{ans.caseQuestion.caseDetails}</p>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-text-light tracking-wider">Question :</span>
+                          <p className="text-text-dark font-semibold mt-0.5">{ans.caseQuestion.question}</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-2 pt-1">
+                          {ans.caseQuestion.options.map((opt, oIdx) => {
+                            const isSelected = ans.selectedOption === oIdx;
+                            const isCorrectAnswer = ans.caseQuestion.correctIndex === oIdx;
+
+                            let optStyle = "border-teal/8 bg-white text-text-dark";
+                            if (isSelected) {
+                              optStyle = ans.isCorrect 
+                                ? "border-success bg-success/5 text-success font-semibold"
+                                : "border-error bg-error/5 text-error font-semibold";
+                            } else if (isCorrectAnswer) {
+                              optStyle = "border-success bg-success/5 text-success font-semibold";
+                            }
+
+                            return (
+                              <div 
+                                key={oIdx}
+                                className={`p-2.5 rounded-lg border flex items-center justify-between ${optStyle}`}
+                              >
+                                <span>{opt}</span>
+                                {isCorrectAnswer && <CheckCircle2 className="h-4 w-4 text-success" />}
+                                {isSelected && !isCorrectAnswer && <XCircle className="h-4 w-4 text-error" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="p-3 bg-teal/5 rounded-lg border border-teal/10 text-[#214646]">
+                          <span className="font-bold block mb-1">Explication médicale :</span>
+                          {ans.caseQuestion.explanation}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Row */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <button
+              onClick={handleRestart}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-teal text-white text-xs font-bold hover:bg-teal-dark transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95"
+            >
+              <RotateCcw className="h-4 w-4" /> Recommencer l'entraînement
+            </button>
+            <Link
+              href="/medquest"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl border border-teal/15 bg-white text-teal text-xs font-bold hover:bg-surface/20 transition-all text-center"
+            >
+              Retour aux arènes
+            </Link>
+          </div>
+
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -255,7 +450,7 @@ function FreePracticeGame() {
                 onClick={handleNext}
                 className="px-6 py-2.5 rounded-full bg-teal text-white-custom text-xs font-semibold flex items-center gap-2 hover:bg-teal-dark transition-all cursor-pointer"
               >
-                Cas suivant <ArrowRight className="h-4 w-4" />
+                {currentIdx + 1 >= questionCount ? "Terminer la session" : "Cas suivant"} <ArrowRight className="h-4 w-4" />
               </button>
             )}
           </div>
