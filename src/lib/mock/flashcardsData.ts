@@ -99,3 +99,124 @@ MOCK_LESSON_LIST.forEach((lesson, index) => {
     });
   }
 });
+
+export const MOCK_FLASHCARD_TREE = [
+  {
+    moduleId: 's1',
+    moduleName: 'Cardiologie',
+    moduleIcon: '🫀',
+    totalCards: 98,
+    masteredCards: 48,
+    dueToday: 6,
+    chapters: [
+      {
+        chapterId: 'c1',
+        chapterTitle: 'Le Cœur',
+        totalCards: 36,
+        masteredCards: 24,
+        dueToday: 4,
+        decks: [
+          {
+            id: 'd1',
+            lessonId: 'l1',
+            lessonTitle: 'Le cycle cardiaque',
+            cardCount: 36,
+            masteredCount: 24,
+            dueCount: 4,
+            source: 'ai_generated',
+          },
+          {
+            id: 'd2',
+            lessonId: 'l2',
+            lessonTitle: 'Anatomie du cœur',
+            cardCount: 24,
+            masteredCount: 12,
+            dueCount: 2,
+            source: 'admin',
+          },
+        ],
+      },
+      {
+        chapterId: 'c2',
+        chapterTitle: 'La Circulation',
+        totalCards: 22,
+        masteredCards: 8,
+        dueToday: 0,
+        decks: [
+          {
+            id: 'd3',
+            lessonId: 'l5',
+            lessonTitle: 'Circulation pulmonaire',
+            cardCount: 22,
+            masteredCount: 8,
+            dueCount: 0,
+            source: 'user_submitted',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    moduleId: 's2',
+    moduleName: 'Neurologie',
+    moduleIcon: '🧠',
+    totalCards: 54,
+    masteredCards: 20,
+    dueToday: 8,
+    chapters: [
+      {
+        chapterId: 'c5',
+        chapterTitle: 'Le Cerveau',
+        totalCards: 30,
+        masteredCards: 14,
+        dueToday: 5,
+        decks: [
+          {
+            id: 'd6',
+            lessonId: 'l12',
+            lessonTitle: 'Anatomie cérébrale',
+            cardCount: 30,
+            masteredCount: 14,
+            dueCount: 5,
+            source: 'ai_generated',
+          },
+        ],
+      },
+    ],
+  },
+];
+
+// For the MedQuest hub section (3 recent decks)
+export const MOCK_RECENT_DECKS = [
+  {
+    id: 'd1',
+    subjectName: 'Cardiologie',
+    subjectIcon: '🫀',
+    lessonTitle: 'Le cycle cardiaque',
+    cardCount: 36,
+    masteredCount: 24,
+    dueCount: 4,
+    status: 'due', // 'due' | 'review' | 'mastered'
+  },
+  {
+    id: 'd6',
+    subjectName: 'Neurologie',
+    subjectIcon: '🧠',
+    lessonTitle: 'Anatomie cérébrale',
+    cardCount: 30,
+    masteredCount: 14,
+    dueCount: 8,
+    status: 'due',
+  },
+  {
+    id: 'd3',
+    subjectName: 'Cardiologie',
+    subjectIcon: '🫀',
+    lessonTitle: 'Circulation pulmonaire',
+    cardCount: 22,
+    masteredCount: 22,
+    dueCount: 0,
+    status: 'mastered',
+  },
+];
+

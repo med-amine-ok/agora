@@ -15,6 +15,8 @@ interface FlashcardState {
   addManualCard: (card: Omit<Flashcard, "id" | "createdAt" | "status" | "source"> & { proposeToCommunity: boolean }) => void;
   moderateCard: (cardId: string, action: "approve" | "reject", reason?: string) => void;
   deleteDeck: (deckId: string) => void;
+  deleteCard: (cardId: string) => void;
+  updateCard: (cardId: string, updates: Partial<Flashcard>) => void;
 }
 
 export const useFlashcardStore = create<FlashcardState>()(
@@ -247,6 +249,50 @@ export const useFlashcardStore = create<FlashcardState>()(
           decks: state.decks.filter((d) => d.id !== deckId),
           flashcards: state.flashcards.filter((c) => c.deckId !== deckId),
         }));
+      },
+
+      deleteCard: (cardId) => {
+        set((state) => {
+          const cardToDelete = state.flashcards.find((c) => c.id === cardId);
+          if (!cardToDelete) return {};
+
+          const updatedCards = state.flashcards.filter((c) => c.id !== cardId);
+          const updatedDecks = state.decks.map((deck) => {
+            if (deck.id === cardToDelete.deckId) {
+              const isAi = cardToDelete.source === "ai_generated";
+              const isUser = cardToDelete.source === "user_submitted";
+              const isDue = state.progress[cardId]
+                ? new Date(state.progress[cardId].nextReviewAt) <= new Date()
+                : true;
+
+              return {
+                ...deck,
+                cardCount: Math.max(0, deck.cardCount - 1),
+                aiGeneratedCount: isAi ? Math.max(0, deck.aiGeneratedCount - 1) : deck.aiGeneratedCount,
+                userSubmittedCount: isUser ? Math.max(0, deck.userSubmittedCount - 1) : deck.userSubmittedCount,
+                dueCount: isDue ? Math.max(0, deck.dueCount - 1) : deck.dueCount,
+              };
+            }
+            return deck;
+          });
+
+          return {
+            flashcards: updatedCards,
+            decks: updatedDecks,
+          };
+        });
+      },
+
+      updateCard: (cardId, updates) => {
+        set((state) => {
+          const updatedCards = state.flashcards.map((c) => {
+            if (c.id === cardId) {
+              return { ...c, ...updates };
+            }
+            return c;
+          });
+          return { flashcards: updatedCards };
+        });
       },
     }),
     {

@@ -1,28 +1,27 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowLeft, 
   ArrowRight,
-  GraduationCap, 
-  Award, 
   Clock, 
   Lock, 
   Check, 
   Play, 
   HelpCircle, 
-  Trophy, 
-  Sparkles,
-  BookOpen,
+  Trophy,
   ChevronRight,
   Flame,
   Calendar,
-  Layers
+  Layers,
+  BookOpen
 } from "lucide-react";
 import { getSubjectById, MOCK_CHAPTERS, MOCK_LESSON_LIST } from "../mockLessonsData";
+import { SUBJECT_CONFIG } from "@/lib/config/subjects";
+import QuickQCMChip from "@/components/lessons/QuickQCMChip";
 
 export default function SubjectDetailPage() {
   const params = useParams();
@@ -30,6 +29,7 @@ export default function SubjectDetailPage() {
   const moduleId = (params?.moduleId as string) || "cardiologie";
 
   const subject = useMemo(() => getSubjectById(moduleId), [moduleId]);
+  const config = useMemo(() => SUBJECT_CONFIG[moduleId] || SUBJECT_CONFIG.cardiologie, [moduleId]);
 
   // Filter chapters belonging to this module
   const moduleChapters = useMemo(() => {
@@ -54,232 +54,220 @@ export default function SubjectDetailPage() {
   // State for hover previews
   const [hoveredLessonId, setHoveredLessonId] = useState<string | null>(null);
 
-  // Scroll animations for connection line
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      
-      // Calculate how far we've scrolled past the top of the container
-      const totalHeight = rect.height - windowHeight;
-      const scrolled = -rect.top;
-      
-      if (totalHeight > 0) {
-        const progress = Math.min(Math.max(scrolled / totalHeight, 0), 1);
-        setScrollProgress(progress);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <div className="relative min-h-screen bg-[#F5FAFA] pt-24 pb-20 font-sans">
-      {/* Subtle glowing mesh backgrounds */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(31,132,118,0.06),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(244,143,0,0.04),_transparent_40%)]" />
+    <div className="relative min-h-screen bg-[#F5FAFA] pt-[56px] pb-24 font-sans text-[#0D2626]">
+      {/* Decorative background gradient reflecting subject's theme */}
+      <div 
+        className="pointer-events-none absolute inset-0 opacity-[0.06] z-0" 
+        style={{
+          backgroundImage: `radial-gradient(circle at top left, ${config.accent}, transparent 45%), radial-gradient(circle at bottom right, #5DC8C6, transparent 45%)`
+        }}
+      />
 
-      <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
+      <main className="relative z-10 mx-auto w-full max-w-[1100px] px-4 md:px-6">
         
-        {/* Back Link */}
-        <button
-          onClick={() => router.push("/lessons")}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-teal hover:text-teal-dark transition-colors font-mono cursor-pointer"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> TOUS LES MODULES
-        </button>
+        {/* Navigation Breadcrumb */}
+        <div className="pt-6">
+          <button
+            onClick={() => router.push("/lessons")}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0E7C7B] hover:text-[#0A3D3D] transition-colors font-mono cursor-pointer"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> TOUS LES MODULES
+          </button>
+        </div>
 
-        {/* Subject Hero Section */}
-        <section className="bg-white border border-teal/10 rounded-3xl p-8 md:p-10 shadow-xs flex flex-col md:flex-row justify-between gap-8 items-start md:items-center">
-          <div className="space-y-4 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-teal/10 text-teal px-2.5 py-0.5 rounded-full">
-                Spécialité
-              </span>
-              <span className="text-text-light text-xs font-mono">• {totalLessonsCount} Leçons</span>
-            </div>
-            <h1 className="font-display text-4xl md:text-5xl font-extrabold text-teal-dark">
-              {subject.name}
-            </h1>
-            <p className="text-sm md:text-base text-text-light leading-relaxed">
-              {subject.focus}. Progressez étape par étape à travers le programme officiel du résidanat.
-            </p>
-            <div className="flex flex-wrap gap-4 pt-2">
-              <div className="flex items-center gap-1.5 text-xs text-text-mid font-medium">
-                <Clock className="h-4 w-4 text-teal" /> {remainingLessonsCount * 12} min restantes
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-text-mid font-medium">
-                <HelpCircle className="h-4 w-4 text-purple-500" /> {totalLessonsCount} Quizz
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-text-mid font-medium">
-                <span>🃏</span> {totalLessonsCount * 4} Flashcards
-              </div>
-            </div>
-          </div>
-
-          <div className="w-full md:w-80 space-y-3 bg-teal/5 border border-teal/10 p-6 rounded-2xl shrink-0">
-            <div className="flex justify-between items-center text-xs font-bold text-teal-dark">
-              <span>Votre Progression</span>
-              <span>{subject.progress}%</span>
-            </div>
-            <div className="h-2 w-full bg-teal/10 rounded-full overflow-hidden">
-              <div className="h-full bg-teal rounded-full" style={{ width: `${subject.progress}%` }} />
-            </div>
-            <div className="flex justify-between text-[10px] text-text-light font-mono">
-              <span>{completedLessonsCount} Validées</span>
-              <span>{remainingLessonsCount} Restantes</span>
-            </div>
-            {activeLesson && (
-              <button 
-                onClick={() => router.push(`/lessons/${moduleId}/${activeLesson.chapterId}/${activeLesson.id}`)}
-                className="w-full mt-3 py-2.5 bg-accent hover:bg-accent-light text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                Continuer <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-        </section>
-
-        {/* Learning Journey Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start">
+        {/* Grid Layout (Page 2 spec) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-[40px] pt-8 items-start">
           
-          {/* Timeline of Lessons */}
-          <div ref={containerRef} className="relative space-y-12 pl-8 md:pl-12">
-            
-            {/* SVG Connection Line */}
-            <div className="absolute left-[15px] md:left-[23px] top-4 bottom-4 w-1 bg-teal/10 rounded-full overflow-hidden">
-              <motion.div 
-                className="w-full bg-teal rounded-full origin-top"
-                style={{ height: `${scrollProgress * 100}%` }}
-              />
+          {/* LEFT COLUMN: Sticky Subject Info Card */}
+          <aside className="lg:sticky lg:top-[80px] space-y-6">
+            <div className="bg-white border border-[#0a3d3d]/8 rounded-[24px] p-6 shadow-[0_2px_12px_rgba(10,61,61,0.04)] text-left flex flex-col justify-between">
+              <div>
+                {/* stylized header */}
+                <span className="text-[11px] font-bold uppercase tracking-[0.06em]" style={{ color: config.accent }}>
+                  {config.level}
+                </span>
+                
+                <h1 className="font-display text-[30px] font-semibold text-[#0D2626] leading-tight mt-1 mb-2">
+                  {subject.name}
+                </h1>
+                
+                <p className="text-[13px] text-[#7A9E9E] leading-[1.5] mb-6">
+                  {subject.focus}
+                </p>
+
+                {/* Grid stats */}
+                <div className="grid grid-cols-3 gap-2 border-t border-b border-[#0a3d3d]/6 py-4 mb-6">
+                  <div className="text-center">
+                    <span className="block text-[15px] font-bold text-[#0D2626] font-mono">{totalLessonsCount}</span>
+                    <span className="text-[10px] text-[#7A9E9E] font-medium uppercase tracking-[0.02em]">Leçons</span>
+                  </div>
+                  <div className="text-center border-l border-r border-[#0a3d3d]/6">
+                    <span className="block text-[15px] font-bold text-[#0D2626] font-mono">{totalLessonsCount * 3}</span>
+                    <span className="text-[10px] text-[#7A9E9E] font-medium uppercase tracking-[0.02em]">Exer.</span>
+                  </div>
+                  <div className="text-center">
+                    <span className="block text-[15px] font-bold text-[#0D2626] font-mono">{totalLessonsCount * 4}</span>
+                    <span className="text-[10px] text-[#7A9E9E] font-medium uppercase tracking-[0.02em]">Cards</span>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="space-y-2 mb-6">
+                  <div className="flex justify-between items-center text-[12px] font-bold text-[#0D2626]">
+                    <span>Progression</span>
+                    <span className="font-mono">{subject.progress}%</span>
+                  </div>
+                  <div className="h-[6px] w-full bg-[#E0F2F2] rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r rounded-full transition-all duration-600" 
+                      style={{ 
+                        width: `${subject.progress}%`,
+                        backgroundImage: `linear-gradient(to right, ${config.accent}, ${config.accentLight})`
+                      }} 
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-[#7A9E9E] font-mono">
+                    <span>{completedLessonsCount} Validées</span>
+                    <span>{remainingLessonsCount} Restantes</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action */}
+              {activeLesson && (
+                <button
+                  onClick={() => router.push(`/lessons/${moduleId}/${activeLesson.chapterId}/${activeLesson.id}`)}
+                  className="w-full py-[12px] text-white text-xs font-bold rounded-[14px] transition-all shadow-[0_4px_12px_rgba(14,124,123,0.15)] flex items-center justify-center gap-1.5 cursor-pointer hover:brightness-105 active:scale-[0.98]"
+                  style={{ backgroundColor: config.accent }}
+                >
+                  Reprendre <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
-            {/* Render chapters & their lessons */}
+            {/* Streak & Time summary cards */}
+            <div className="bg-white border border-[#0a3d3d]/8 rounded-[24px] p-5 shadow-[0_2px_12px_rgba(10,61,61,0.04)] space-y-4 text-left">
+              <div className="flex items-center gap-3">
+                <Flame className="h-5 w-5 text-[#E8593C] fill-[#E8593C] animate-bounce" />
+                <div>
+                  <h4 className="text-[13px] font-bold text-[#0D2626]">14 jours de streak</h4>
+                  <p className="text-[11px] text-[#7A9E9E]">Continuez sur votre lancée !</p>
+                </div>
+              </div>
+              <div className="h-[1px] bg-[#0a3d3d]/6" />
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-[#0E7C7B]" />
+                <div>
+                  <h4 className="text-[13px] font-bold text-[#0D2626]">4h 25m d'étude</h4>
+                  <p className="text-[11px] text-[#7A9E9E]">Cette semaine</p>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* RIGHT COLUMN: Vertical Lesson Node Path */}
+          <div className="relative pl-[36px] md:pl-[48px] space-y-12">
+            
+            {/* Central Vertical Connecting Line */}
+            <div className="absolute left-[15px] md:left-[21px] top-4 bottom-4 w-[3px] bg-[#C8E8E8] rounded-full" />
+
             {moduleChapters.map((chapter) => {
               const chapterLessons = allLessons.filter(l => l.chapterId === chapter.id);
               
               return (
-                <div key={chapter.id} className="space-y-8">
-                  {/* Chapter Section Title Node */}
-                  <div className="relative pl-6">
-                    <div className="absolute -left-[37px] md:-left-[45px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-teal border-4 border-[#F5FAFA] z-10" />
-                    <div className="space-y-1 text-left">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-teal">
-                        Niveau {chapter.level} • {chapter.title}
-                      </span>
-                      <h2 className="font-display text-lg font-bold text-teal-dark">
-                        {chapter.description}
-                      </h2>
-                    </div>
+                <div key={chapter.id} className="space-y-6">
+                  
+                  {/* Chapter Section title node */}
+                  <div className="relative pl-4 text-left">
+                    <div className="absolute -left-[30px] md:-left-[36px] top-1.5 flex h-[13px] w-[13px] items-center justify-center rounded-full bg-white border-2 border-[#0E7C7B] z-10" />
+                    <span className="text-[11px] font-bold uppercase tracking-[0.05em]" style={{ color: config.accent }}>
+                      Niveau {chapter.level} • {chapter.title}
+                    </span>
+                    <h2 className="font-display text-[18px] font-bold text-[#0D2626] mt-[2px]">
+                      {chapter.description}
+                    </h2>
                   </div>
 
-                  {/* Lessons in Chapter */}
-                  <div className="space-y-6">
-                    {chapterLessons.map((lesson, idx) => {
+                  {/* Lessons */}
+                  <div className="space-y-4">
+                    {chapterLessons.map((lesson, index) => {
                       const isActive = activeLesson?.id === lesson.id;
                       const isCompleted = lesson.isCompleted;
                       const isLocked = lesson.isLocked && !isActive;
-                      
-                      // Node style based on format/type
-                      let nodeType = "normal";
-                      if (idx === chapterLessons.length - 1 && chapter.level === moduleChapters.length) {
-                        nodeType = "final";
-                      } else if (lesson.title.toLowerCase().includes("quizz") || lesson.title.toLowerCase().includes("qcm")) {
-                        nodeType = "quiz";
-                      } else if (lesson.title.toLowerCase().includes("flashcards") || lesson.title.toLowerCase().includes("cartes")) {
-                        nodeType = "flashcard";
-                      }
 
                       return (
-                        <div key={lesson.id} className="relative pl-6">
+                        <div key={lesson.id} className="relative pl-4">
                           
-                          {/* Jalon (Node) Marker */}
-                          <div className="absolute -left-[45px] md:-left-[53px] top-2 z-20">
+                          {/* Circular Node */}
+                          <div className="absolute -left-[38px] md:-left-[44px] top-1/2 -translate-y-1/2 z-20">
                             {isCompleted ? (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal text-white border-4 border-[#F5FAFA] shadow-xs">
-                                <Check className="h-3.5 w-3.5 stroke-[3]" />
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0E7C7B] text-white border-4 border-[#F5FAFA] shadow-xs">
+                                <Check className="h-3 w-3 stroke-[3]" />
                               </div>
                             ) : isActive ? (
-                              <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white border-4 border-accent shadow-md">
-                                <motion.div 
-                                  animate={{ scale: [1, 1.2, 1] }}
-                                  transition={{ repeat: Infinity, duration: 2 }}
-                                  className="absolute inset-0 rounded-full border-2 border-accent/40"
-                                />
-                                <Play className="h-3 w-3 fill-accent text-accent ml-0.5" />
+                              <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-white border-2 shadow-sm" style={{ borderColor: config.accent }}>
+                                <Play className="h-2.5 w-2.5 ml-0.5" style={{ fill: config.accent, color: config.accent }} />
                               </div>
                             ) : isLocked ? (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-400 border-4 border-[#F5FAFA]">
-                                <Lock className="h-3 w-3" />
-                              </div>
-                            ) : nodeType === "quiz" ? (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-500 text-white border-4 border-[#F5FAFA] shadow-xs">
-                                <HelpCircle className="h-3.5 w-3.5" />
-                              </div>
-                            ) : nodeType === "flashcard" ? (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-white border-4 border-[#F5FAFA] shadow-xs">
-                                <span className="text-xs">🃏</span>
-                              </div>
-                            ) : nodeType === "final" ? (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500 text-white border-4 border-[#F5FAFA] shadow-xs">
-                                <Trophy className="h-3.5 w-3.5" />
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E0F2F2] text-[#7A9E9E] border-4 border-[#F5FAFA]">
+                                <Lock className="h-2.5 w-2.5" />
                               </div>
                             ) : (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white border-2 border-teal/30 text-teal border-4 border-[#F5FAFA]">
-                                <div className="h-2 w-2 rounded-full bg-teal" />
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white border-2 border-[#C8E8E8] border-4 border-[#F5FAFA]">
+                                <div className="h-1.5 w-1.5 rounded-full bg-[#7A9E9E]" />
                               </div>
                             )}
                           </div>
 
-                          {/* Lesson Card Node */}
+                          {/* Lesson Card */}
                           <div 
                             className="relative"
                             onMouseEnter={() => setHoveredLessonId(lesson.id)}
                             onMouseLeave={() => setHoveredLessonId(null)}
                           >
-                            <Link 
+                            <Link
                               href={isLocked ? "#" : `/lessons/${moduleId}/${chapter.id}/${lesson.id}`}
-                              className={`block rounded-2xl border bg-white p-5 text-left transition-all ${
+                              className={`block rounded-[16px] border bg-white p-4 text-left transition-all duration-200 ${
                                 isLocked 
-                                  ? "border-teal/5 opacity-70 cursor-not-allowed" 
+                                  ? "border-[#0a3d3d]/5 opacity-65 cursor-not-allowed" 
                                   : isActive
-                                    ? "border-accent shadow-sm hover:scale-[1.01]"
-                                    : "border-teal/10 hover:border-teal/20 hover:shadow-xs"
+                                    ? "shadow-sm hover:scale-[1.01]"
+                                    : "border-[#0a3d3d]/8 hover:border-[#0e7c7b]/20 hover:shadow-xs"
                               }`}
+                              style={{
+                                borderColor: isActive ? config.accent : undefined
+                              }}
                             >
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="space-y-1">
                                   <div className="flex items-center gap-2">
-                                    <h3 className={`font-display text-base font-bold ${isLocked ? "text-text-light" : "text-teal-dark"}`}>
+                                    <h3 className={`font-sans text-[15px] font-semibold ${isLocked ? "text-[#7A9E9E]" : "text-[#0D2626]"}`}>
                                       {lesson.title}
                                     </h3>
                                     {lesson.hasAnatomy && (
                                       <span className="text-xs" title="Modèle 3D d'anatomie inclus">🫀</span>
                                     )}
                                   </div>
-                                  <div className="flex items-center gap-3 text-[11px] text-text-light font-mono">
+                                  <div className="flex items-center gap-3 text-[11px] text-[#7A9E9E] font-mono">
                                     <span>{lesson.estimatedMinutes} min</span>
                                     <span>•</span>
-                                    <span className="text-teal capitalize">{lesson.tags[0] || "Général"}</span>
+                                    <span style={{ color: config.accent }}>{lesson.tags[1] || "Général"}</span>
                                   </div>
                                 </div>
 
-                                <div className="shrink-0 flex items-center gap-3">
-                                  {isLocked ? (
-                                    <span className="text-[10px] font-bold text-text-light font-mono uppercase bg-gray-100 px-2 py-0.5 rounded-full">
-                                      Verrouillé
-                                    </span>
-                                  ) : isCompleted ? (
-                                    <span className="text-[10px] font-bold text-teal font-mono uppercase bg-teal/5 px-2.5 py-0.5 rounded-full">
-                                      Validé
-                                    </span>
-                                  ) : (
-                                    <span className="text-[10px] font-bold text-accent font-mono uppercase bg-accent/5 px-2.5 py-0.5 rounded-full">
-                                      Étudier
+                                <div className="shrink-0 flex items-center gap-2">
+                                  {/* QCM / Cards quick chips */}
+                                  {lesson.questionCount > 0 && !isLocked && (
+                                    <QuickQCMChip
+                                      chapterId={chapter.id}
+                                      lessonId={lesson.id}
+                                      questionCount={lesson.questionCount}
+                                    />
+                                  )}
+                                  {lesson.flashcardCount > 0 && !isLocked && (
+                                    <span className="inline-flex items-center gap-0.5 rounded-full bg-[#E0F2F2] border border-[#0a3d3d]/8 px-2 py-0.5 text-[10px] font-semibold text-[#0E7C7B]">
+                                      <span>🃏</span> {lesson.flashcardCount}
                                     </span>
                                   )}
                                 </div>
@@ -293,22 +281,23 @@ export default function SubjectDetailPage() {
                                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                   animate={{ opacity: 1, y: 0, scale: 1 }}
                                   exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                                  className="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2 sm:w-72 bg-white border border-teal/15 rounded-2xl p-5 shadow-lg z-50 text-left space-y-3"
+                                  className="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2 sm:w-72 bg-white border border-[#0a3d3d]/12 rounded-[20px] p-5 shadow-[0_12px_32px_rgba(10,61,61,0.15)] z-50 text-left space-y-3"
                                 >
-                                  <h4 className="font-display text-sm font-bold text-teal-dark">
+                                  <h4 className="font-display text-sm font-bold text-[#0D2626]">
                                     {lesson.title}
                                   </h4>
-                                  <div className="h-px bg-teal/10" />
-                                  <div className="grid grid-cols-2 gap-2 text-xs font-mono text-text-mid">
-                                    <div>⏱ Durée : <span className="font-bold">{lesson.estimatedMinutes} min</span></div>
-                                    <div>🃏 Cartes : <span className="font-bold">{lesson.flashcardCount}</span></div>
-                                    <div>❓ Quizz : <span className="font-bold">{lesson.questionCount}</span></div>
-                                    <div>📑 Sections : <span className="font-bold">{lesson.sectionCount}</span></div>
+                                  <div className="h-[1px] bg-[#0a3d3d]/8" />
+                                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-[#7A9E9E]">
+                                    <div>⏱ Durée : <span className="font-bold text-[#0D2626]">{lesson.estimatedMinutes} min</span></div>
+                                    <div>🃏 Cards : <span className="font-bold text-[#0D2626]">{lesson.flashcardCount}</span></div>
+                                    <div>❓ Quizz : <span className="font-bold text-[#0D2626]">{lesson.questionCount}</span></div>
+                                    <div>📑 Sections : <span className="font-bold text-[#0D2626]">{lesson.sectionCount}</span></div>
                                   </div>
                                   {!isLocked && (
                                     <button 
                                       onClick={() => router.push(`/lessons/${moduleId}/${chapter.id}/${lesson.id}`)}
-                                      className="w-full mt-2 py-2 bg-teal hover:bg-teal-dark text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                                      className="w-full mt-2 py-2 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:brightness-105"
+                                      style={{ backgroundColor: config.accent }}
                                     >
                                       Commencer <ArrowRight className="h-3.5 w-3.5" />
                                     </button>
@@ -322,63 +311,49 @@ export default function SubjectDetailPage() {
                       );
                     })}
                   </div>
+
                 </div>
               );
             })}
           </div>
 
-          {/* Sticky Sidebar */}
-          <aside className="sticky top-24 hidden lg:block space-y-6">
-            <div className="bg-white border border-teal/10 rounded-3xl p-6 shadow-xs space-y-6 text-left">
-              <h3 className="font-display text-base font-bold text-teal-dark">
-                Objectifs & Statistiques
-              </h3>
-              
-              <div className="space-y-4">
-                {/* Today's Goal */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold text-text-dark">
-                    <span>Objectif du Jour</span>
-                    <span className="text-teal font-mono">1 / 2 leçons</span>
-                  </div>
-                  <div className="h-2 w-full bg-teal/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-teal rounded-full" style={{ width: "50%" }} />
-                  </div>
-                </div>
-
-                {/* Streak */}
-                <div className="flex items-center gap-3 p-3 bg-accent/5 rounded-2xl border border-accent/10">
-                  <Flame className="h-6 w-6 text-accent fill-accent animate-bounce" />
-                  <div>
-                    <h4 className="text-xs font-bold text-teal-dark">14 jours de streak</h4>
-                    <p className="text-[10px] text-text-light">Continuez sur votre lancée !</p>
-                  </div>
-                </div>
-
-                {/* Weekly Time */}
-                <div className="flex items-center gap-3 p-3 bg-teal/5 rounded-2xl border border-teal/10">
-                  <Calendar className="h-5 w-5 text-teal" />
-                  <div>
-                    <h4 className="text-xs font-bold text-teal-dark">4h 25m d'étude</h4>
-                    <p className="text-[10px] text-text-light">Cette semaine</p>
-                  </div>
-                </div>
-              </div>
-
-              {activeLesson && (
-                <button
-                  onClick={() => router.push(`/lessons/${moduleId}/${activeLesson.chapterId}/${activeLesson.id}`)}
-                  className="w-full py-3 bg-accent hover:bg-accent-light text-white text-xs font-bold rounded-2xl transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  Reprendre la leçon <ArrowRight className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </aside>
-
         </div>
 
       </main>
+
+      {/* Sticky Bottom Resume Bar */}
+      {activeLesson && (
+        <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#0a3d3d]/10 bg-white/90 backdrop-blur-md shadow-[0_-4px_20px_-4px_rgba(10,61,61,0.08)] py-4">
+          <div className="mx-auto flex max-w-[1100px] items-center justify-between px-4 md:px-6">
+            <div className="flex items-center gap-3">
+              <div 
+                className="flex h-10 w-10 items-center justify-center rounded-full text-white animate-pulse"
+                style={{ backgroundColor: config.accent }}
+              >
+                <Play className="h-4 w-4 fill-white text-white ml-0.5" />
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-bold text-[#0D2626]">
+                  Reprendre : {activeLesson.title}
+                </p>
+                <p className="text-[10px] text-[#7A9E9E] font-mono">
+                  Module : {subject.name} • {activeLesson.estimatedMinutes} min restantes
+                </p>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => router.push(`/lessons/${moduleId}/${activeLesson.chapterId}/${activeLesson.id}`)}
+              className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-xs font-semibold text-white hover:brightness-105 transition-all shadow-sm cursor-pointer"
+              style={{ backgroundColor: config.accent }}
+            >
+              <span>Reprendre</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

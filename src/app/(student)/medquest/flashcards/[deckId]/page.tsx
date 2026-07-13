@@ -30,6 +30,7 @@ export default function FlashcardStudySession() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showEndScreen, setShowEndScreen] = useState(false);
+  const [showQuitDialog, setShowQuitDialog] = useState(false);
   const [history, setHistory] = useState<{ cardId: string; rating: FlashcardRating }[]>([]);
 
   // Statistics trackers
@@ -78,14 +79,14 @@ export default function FlashcardStudySession() {
 
   if (!currentDeck || totalCards === 0) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-white p-6 text-center space-y-4">
-        <h2 className="font-display text-2xl font-bold text-text-dark">Aucune carte disponible</h2>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#F5FAFA] p-6 text-center space-y-4 text-text-dark">
+        <h2 className="font-display text-2xl font-black text-text-dark">Aucune carte disponible</h2>
         <p className="text-sm text-text-light max-w-sm">
           Ce deck n'existe pas ou ne contient pas encore de cartes validées pour l'étude.
         </p>
         <button
           onClick={handleQuit}
-          className="rounded-full bg-teal px-6 py-2.5 text-xs font-semibold text-white hover:bg-teal-dark transition-all"
+          className="rounded-xl bg-[#0E7C7B] hover:bg-[#0A3D3D] px-6 py-3 text-xs font-bold text-white transition-all duration-200 cursor-pointer"
         >
           Retour au Hub
         </button>
@@ -95,8 +96,8 @@ export default function FlashcardStudySession() {
 
   if (showEndScreen) {
     return (
-      <main className="min-h-screen bg-white pt-24 pb-12">
-        <div className="mx-auto max-w-xl px-4">
+      <main className="min-h-screen bg-[#F5FAFA] text-text-dark pt-24 pb-12 flex items-center justify-center">
+        <div className="mx-auto max-w-xl px-4 w-full">
           <SessionEndScreen
             totalReviewed={totalCards}
             masteredCount={easyCount + okCount}
@@ -125,19 +126,19 @@ export default function FlashcardStudySession() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-center items-center py-24 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5FAFA] text-text-dark flex flex-col justify-center items-center py-24 px-4 sm:px-6 lg:px-8">
       {/* Immersive Fixed Session Header */}
       <SessionHeader
         title={currentDeck.lessonTitle}
         currentIndex={currentIndex + 1}
         totalCards={totalCards}
-        onQuit={handleQuit}
+        onQuit={() => setShowQuitDialog(true)}
         onSkip={handleSkip}
         hasRated={isFlipped}
       />
 
       {/* Active Card Platform */}
-      <main className="w-full flex-grow flex items-center justify-center">
+      <main className="w-full flex-grow flex items-center justify-center z-10">
         {currentCard && (
           <FlashCard
             card={currentCard}
@@ -147,6 +148,30 @@ export default function FlashcardStudySession() {
           />
         )}
       </main>
+
+      {/* Quit Confirmation Dialog */}
+      {showQuitDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white border border-[#0A3D3D]/10 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center">
+            <h3 className="font-display text-lg font-black text-text-dark">Quitter la session ?</h3>
+            <p className="text-xs text-text-light leading-relaxed">Votre progression actuelle sera sauvegardée, mais vous quitterez l'arène de révision.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowQuitDialog(false)}
+                className="flex-1 py-2.5 rounded-xl border border-[#0A3D3D]/10 hover:bg-slate-50 text-text-light font-bold text-xs transition-all cursor-pointer"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleQuit}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs transition-all cursor-pointer"
+              >
+                Quitter
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

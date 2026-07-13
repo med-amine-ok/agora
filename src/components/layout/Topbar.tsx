@@ -30,7 +30,6 @@ export default function Topbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isLearnOpen, setIsLearnOpen] = useState(false);
 
   // Monitor scroll for styling transition
   useEffect(() => {
@@ -98,69 +97,17 @@ export default function Topbar() {
               <span>Dashboard</span>
             </Link>
 
-            {/* Learn Dropdown Link */}
-            <div
-              className="relative"
-              onMouseEnter={() => setIsLearnOpen(true)}
-              onMouseLeave={() => setIsLearnOpen(false)}
+            {/* Lessons Link */}
+            <Link
+              href="/lessons"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                isActive("/lessons")
+                  ? "bg-teal text-white-custom"
+                  : "text-text-light hover:text-teal hover:bg-surface/30"
+              }`}
             >
-              <button
-                className={`flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  isActive("/lessons") || isActive("/medquest/flashcards") || isActive("/statistics")
-                    ? "bg-teal/10 text-teal-dark"
-                    : "text-text-light hover:text-teal hover:bg-surface/30"
-                }`}
-              >
-                <span>Learn</span>
-                <ChevronDown className={`h-3 w-3 transition-transform ${isLearnOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              <AnimatePresence>
-                {isLearnOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 rounded-xl border border-teal/10 bg-white p-1.5 shadow-xl z-50"
-                  >
-                    <Link
-                      href="/lessons"
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                        isActive("/lessons")
-                          ? "bg-teal/5 text-teal-dark"
-                          : "text-text hover:bg-surface/50 hover:text-teal"
-                      }`}
-                    >
-                      <BookOpen className="h-3.5 w-3.5" />
-                      <span>Leçons</span>
-                    </Link>
-                    <Link
-                      href="/medquest/flashcards"
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                        isActive("/medquest/flashcards")
-                          ? "bg-teal/5 text-teal-dark"
-                          : "text-text hover:bg-surface/50 hover:text-teal"
-                      }`}
-                    >
-                      <Activity className="h-3.5 w-3.5" />
-                      <span>Flashcards</span>
-                    </Link>
-                    <Link
-                      href="/statistics"
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                        isActive("/statistics")
-                          ? "bg-teal/5 text-teal-dark"
-                          : "text-text hover:bg-surface/50 hover:text-teal"
-                      }`}
-                    >
-                      <BarChart3 className="h-3.5 w-3.5" />
-                      <span>Statistiques</span>
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+              <span>Leçons</span>
+            </Link>
 
             {/* MedQuest Link */}
             <Link
@@ -285,6 +232,14 @@ export default function Topbar() {
                   >
                     <Settings className="h-3.5 w-3.5" />
                     <span>Paramètres</span>
+                  </Link>
+                  <Link
+                    href="/statistics"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text hover:bg-surface/50 hover:text-teal transition-all"
+                  >
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    <span>Statistiques</span>
                   </Link>
                   <button
                     onClick={handleLogout}

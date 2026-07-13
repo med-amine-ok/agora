@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { Compass, Zap, Users, ArrowRight, X, Settings, Sparkles, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { LESSONS_DATA } from "../lessons/mockLessonsData";
+import MedQuestFlashcardsSection from "@/components/flashcards/MedQuestFlashcardsSection";
 
 type GameMode = "free" | "blitz" | "room" | null;
 
@@ -167,6 +168,11 @@ export default function MedQuestPage() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Flashcards Section */}
+        <div className="mt-12">
+          <MedQuestFlashcardsSection />
         </div>
       </main>
 
