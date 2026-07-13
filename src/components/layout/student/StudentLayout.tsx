@@ -19,11 +19,8 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   const mobileLinks = [
     { name: "Tableau", href: "/dashboard", icon: <Compass className="h-4.5 w-4.5" /> },
     { name: "Leçons", href: "/lessons", icon: <BookOpen className="h-4.5 w-4.5" /> },
-    { name: "Cartes", href: "/medquest/flashcards", icon: <Activity className="h-4.5 w-4.5" /> },
     { name: "MedQuest", href: "/medquest", icon: <Trophy className="h-4.5 w-4.5" /> },
-    { name: "Stats", href: "/statistics", icon: <Activity className="h-4.5 w-4.5" /> },
     { name: "Articles", href: "/articles", icon: <Rss className="h-4.5 w-4.5" /> },
-    { name: "Profil", href: "/profile", icon: <User className="h-4.5 w-4.5" /> },
   ];
 
   const isActive = (href: string) => pathname.startsWith(href);

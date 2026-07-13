@@ -5,20 +5,33 @@ import { useAgoraStore } from "@/store/useAgoraStore";
 import { useFlashcardStore } from "@/lib/store/flashcardStore";
 import ProgressTracker from "@/components/stats/ProgressTracker";
 import SubjectProgressTable from "@/components/stats/SubjectProgressTable";
-import { Award, BookOpen, Clock, Flame, GraduationCap, Trophy, User } from "lucide-react";
+
+// Portfolio sub-components
+import ProfileHero from "@/components/profile/ProfileHero";
+import StatsGrid from "@/components/profile/StatsGrid";
+import LevelProgress from "@/components/profile/LevelProgress";
+import LearningJourney from "@/components/profile/LearningJourney";
+import SubjectMastery from "@/components/profile/SubjectMastery";
+import AchievementsGallery from "@/components/profile/AchievementsGallery";
+import StudyHeatmap from "@/components/profile/StudyHeatmap";
+import RecentActivity from "@/components/profile/RecentActivity";
+import WeeklyAnalytics from "@/components/profile/WeeklyAnalytics";
+import GoalsCard from "@/components/profile/GoalsCard";
+import Collections from "@/components/profile/Collections";
+import FriendsPreview from "@/components/profile/FriendsPreview";
+import EditProfileModal from "@/components/profile/EditProfileModal";
 
 export default function ProfilePage() {
   const { user } = useAgoraStore();
   const { flashcards, progress } = useFlashcardStore();
+  
+  // Custom Profile states matching user info
   const [university, setUniversity] = useState("Université d'Alger 1 (Faculté de Médecine)");
   const [year, setYear] = useState("4ème Année - Externe");
-
-  const badges = [
-    { title: "Premier Pouls", desc: "A complété sa première leçon clinique", icon: "❤️" },
-    { title: "Maître de l'ECG", desc: "Score parfait sur le module de cardiologie", icon: "⚡" },
-    { title: "Champion du Blitz", desc: "Top 3 dans une arène Blitz hebdomadaire", icon: "🏆" },
-    { title: "Clinicien Précis", desc: "A atteint 90% de précision sur 50 questions", icon: "🎯" },
-  ];
+  const [bio, setBio] = useState("Passionné par la cardiologie clinique et l'apprentissage par répétition espacée.");
+  const [specialty, setSpecialty] = useState("Cardiologie");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"overview" | "progress" | "achievements" | "activity" | "collections">("overview");
 
   // Dynamically calculate flashcard statistics
   const flashcardStats = useMemo(() => {
@@ -39,96 +52,157 @@ export default function ProfilePage() {
     return { total, mastered, due };
   }, [flashcards, progress]);
 
+  // Handle saving the modified user profile details
+  const handleSaveProfile = (data: { university: string; year: string; specialty: string; bio: string }) => {
+    setUniversity(data.university);
+    setYear(data.year);
+    setSpecialty(data.specialty);
+    setBio(data.bio);
+  };
+
+  const tabs = [
+    { id: "overview", label: "Vue d'ensemble" },
+    { id: "progress", label: "Cursus & Cibles" },
+    { id: "achievements", label: "Médailles & Badges" },
+    { id: "activity", label: "Activité" },
+    { id: "collections", label: "Collections" },
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-      {/* Header section with profile overview */}
-      <div className="p-6 rounded-2xl border border-teal/10 bg-white-custom/80 backdrop-blur-md shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
-          <div className="h-20 w-20 rounded-full bg-teal text-white-custom flex items-center justify-center font-bold text-3xl shadow-md border-2 border-teal-light/20">
-            {user?.name?.charAt(0) || "U"}
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-text-dark">{user?.name}</h1>
-            <p className="text-xs text-text-light flex items-center gap-1.5 justify-center md:justify-start mt-1">
-              <GraduationCap className="h-4 w-4 text-teal" /> {university}
-            </p>
-            <p className="text-[11px] font-semibold text-teal bg-teal/10 px-2 py-0.5 rounded-full inline-block mt-2">
-              {year}
-            </p>
-          </div>
-        </div>
+    <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-8 font-sans overflow-hidden">
+      {/* 1. Redesigned Premium Profile Hero Banner */}
+      <ProfileHero
+        user={user}
+        university={university}
+        year={year}
+        bio={bio}
+        specialty={specialty}
+        onEditClick={() => setIsEditModalOpen(true)}
+      />
 
-        {/* Action button */}
-        <button className="px-4 py-2 border border-teal/20 hover:border-teal rounded-lg text-xs font-semibold text-teal-dark hover:bg-surface/35 transition-all">
-          Modifier Profil
-        </button>
+      {/* 2. Interactive Navigation Tabs */}
+      <div className="flex border-b border-teal/10 overflow-x-auto pb-px scrollbar-none gap-2">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`px-5 py-3 text-xs font-bold whitespace-nowrap transition-all border-b-2 cursor-pointer ${
+              activeTab === tab.id
+                ? "border-teal text-teal font-extrabold"
+                : "border-transparent text-text-light hover:text-text-dark"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column: Quick Stats */}
-        <div className="md:col-span-1 p-6 rounded-2xl border border-teal/10 bg-white-custom/80 backdrop-blur-md shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-text-dark border-b border-teal/5 pb-2">Statistiques Globales</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-light flex items-center gap-1.5">
-                <Flame className="h-4 w-4 text-accent" /> Série Active
-              </span>
-              <span className="text-xs font-bold text-text-dark">{user?.streak || 0} jours</span>
+      {/* 3. Dynamic Tab Contents */}
+      {activeTab === "overview" && (
+        <div className="space-y-8 animate-fadeIn">
+          {/* Quick Metrics Dashboard */}
+          <StatsGrid
+            streak={user?.streak || 12}
+            xp={user?.points || 840}
+            lessonsCompleted={8}
+            flashcardsMastered={flashcardStats.mastered}
+            quizzesCompleted={412}
+            achievementsCount={3}
+            studyHours={42}
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              {/* Yearly Activity Heatmap */}
+              <StudyHeatmap />
+
+              {/* Recent Activities Timeline */}
+              <RecentActivity />
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-light flex items-center gap-1.5">
-                <Award className="h-4 w-4 text-teal" /> XP Cumulés
-              </span>
-              <span className="text-xs font-bold text-text-dark">{user?.points || 0} XP</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-light flex items-center gap-1.5">
-                <BookOpen className="h-4 w-4 text-teal" /> Leçons validées
-              </span>
-              <span className="text-xs font-bold text-text-dark">8 cours</span>
+
+            <div className="space-y-8">
+              {/* Level progression bar */}
+              <LevelProgress xp={user?.points || 840} />
+
+              {/* Current active targets */}
+              <GoalsCard />
+
+              {/* Peer Classroom Preview */}
+              <FriendsPreview />
             </div>
           </div>
         </div>
+      )}
 
-        {/* Right Column: Badges & Achievements */}
-        <div className="md:col-span-2 p-6 rounded-2xl border border-teal/10 bg-white-custom/80 backdrop-blur-md shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-text-dark border-b border-teal/5 pb-2">Badges de Mérite</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {badges.map((badge, idx) => (
-              <div key={idx} className="flex gap-3 p-3.5 rounded-xl bg-surface/35 border border-teal/5 hover:border-teal/20 transition-all">
-                <span className="text-2xl">{badge.icon}</span>
-                <div>
-                  <h4 className="text-xs font-bold text-text-dark">{badge.title}</h4>
-                  <p className="text-[10px] text-text-light leading-normal mt-0.5">{badge.desc}</p>
-                </div>
+      {activeTab === "progress" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fadeIn">
+          <div className="lg:col-span-2 space-y-6">
+            <h3 className="text-base font-bold text-text-dark font-display">Maîtrise par matières</h3>
+            <SubjectMastery />
+            
+            <h3 className="text-base font-bold text-text-dark font-display pt-4">Progression détaillée</h3>
+            <SubjectProgressTable />
+          </div>
+
+          <div className="space-y-6">
+            <LearningJourney />
+            <div className="p-6 rounded-2xl border border-teal/15 bg-white-custom/60 backdrop-blur-md shadow-sm">
+              <h4 className="text-xs font-bold text-text-dark">Résumé de l'Apprentissage</h4>
+              <div className="mt-4">
+                <ProgressTracker
+                  lessonsRead={8}
+                  totalLessons={24}
+                  modulesRead={15}
+                  totalModules={40}
+                  qcmsAnswered={412}
+                  qcmPrecision={84}
+                  flashcardsMastered={flashcardStats.mastered}
+                  totalFlashcards={flashcardStats.total}
+                  flashcardsDueToday={flashcardStats.due}
+                />
               </div>
-            ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Progress Trackers */}
-      <div className="space-y-6 pt-4">
-        <h2 className="text-lg font-bold font-display text-text-dark border-b border-teal/10 pb-2">
-          Suivi de l'Apprentissage & Performance
-        </h2>
-        <ProgressTracker 
-          lessonsRead={8}
-          totalLessons={24}
-          modulesRead={15}
-          totalModules={40}
-          qcmsAnswered={412}
-          qcmPrecision={84}
-          flashcardsMastered={flashcardStats.mastered}
-          totalFlashcards={flashcardStats.total}
-          flashcardsDueToday={flashcardStats.due}
-        />
-        
-        <div className="space-y-2">
-          <h3 className="text-sm font-bold text-text-dark">Progression détaillée par matière</h3>
-          <SubjectProgressTable />
+      {activeTab === "achievements" && (
+        <div className="space-y-6 animate-fadeIn">
+          <div>
+            <h3 className="text-base font-bold text-text-dark font-display">Galerie des Trophées</h3>
+            <p className="text-xs text-text-light">Vos accomplissements débloqués et en cours d'acquisition</p>
+          </div>
+          <AchievementsGallery />
         </div>
-      </div>
+      )}
+
+      {activeTab === "activity" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeIn">
+          <RecentActivity />
+          <WeeklyAnalytics />
+        </div>
+      )}
+
+      {activeTab === "collections" && (
+        <div className="space-y-6 animate-fadeIn">
+          <div>
+            <h3 className="text-base font-bold text-text-dark font-display">Ma Bibliothèque</h3>
+            <p className="text-xs text-text-light">Vos ressources cliniques, signets, et documents sauvegardés</p>
+          </div>
+          <Collections />
+        </div>
+      )}
+
+      {/* Edit Profile Premium Modal */}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        university={university}
+        year={year}
+        specialty={specialty}
+        bio={bio}
+        onSave={handleSaveProfile}
+      />
     </div>
   );
 }
