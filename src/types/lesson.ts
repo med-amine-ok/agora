@@ -12,6 +12,36 @@ export interface Chapter {
   isNew: boolean;               // shows "NOUVEAU" badge
   isLocked: boolean;
   flashcardCount?: number;      // shown as "🃏 X flashcards" chip
+  icon?: string;                // e.g. Lucide icon name or emoji
+}
+
+export interface AnatomyRegion {
+  id: string;
+  name: string;
+  desc: string;
+  color: string;
+}
+
+export interface AnatomyData {
+  type: string;
+  regions: AnatomyRegion[];
+}
+
+export interface LessonSection {
+  title: string;
+  content: string;
+}
+
+export interface CheckpointOption {
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface Checkpoint {
+  sectionIndex: number;
+  question: string;
+  options: CheckpointOption[];
+  explanation: string;
 }
 
 export interface LessonListItem {
@@ -27,4 +57,10 @@ export interface LessonListItem {
   completionPercent: number;
   isCompleted: boolean;
   isLocked: boolean;
+  icon?: string;                // e.g. Lucide icon name or emoji
+  sections?: LessonSection[];
+  checkpoints?: Checkpoint[];
+  anatomyData?: AnatomyData;
+  summaryPoints?: string[];
 }
+

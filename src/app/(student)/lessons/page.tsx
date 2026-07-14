@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { LESSONS_DATA, MOCK_CHAPTERS } from "./mockLessonsData";
 import { SUBJECT_CONFIG } from "@/lib/config/subjects";
+import CourseIllustration from "@/components/illustrations/CourseIllustrations";
 
 export default function LessonsPage() {
   const router = useRouter();
@@ -130,12 +131,24 @@ export default function LessonsPage() {
                     >
                       {/* Icon Box */}
                       <div 
-                        className="w-[52px] h-[52px] rounded-[14px] flex items-center justify-center text-[26px] shrink-0"
-                        style={{
-                          background: `linear-gradient(135deg, ${config.accent} 0%, ${config.accentLight} 100%)`
-                        }}
+                        className={`w-[62px] h-[62px]  flex items-center justify-center shrink-0 overflow-hidden ${subject.imageUrl ? "p-2" : "p-2.5"}`}
+                       
                       >
-                        {config.emoji}
+                        {subject.imageUrl ? (
+                          <img 
+                            src={subject.imageUrl} 
+                            alt={subject.name} 
+                            className="w-full h-full object-contain" 
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'block';
+                            }}
+                          />
+                        ) : null}
+                        <div style={{ display: subject.imageUrl ? 'none' : 'block' }} className="w-full h-full">
+                          <CourseIllustration subjectId={subject.id} color="#FFFFFF" accent={config.accentLight} className="w-full h-full text-white" />
+                        </div>
                       </div>
 
                       {/* Text Group */}
@@ -225,67 +238,78 @@ export default function LessonsPage() {
                                   router.push(`/lessons/${subject.id}/${chapter.id}`);
                                 }
                               }}
-                              className="w-[188px] shrink-0 scroll-snap-align-start rounded-[16px] bg-white border border-[#0a3d3d]/8 shadow-[0_2px_8px_rgba(10,61,61,0.05)] overflow-hidden cursor-pointer hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(10,61,61,0.12)] hover:border-[#0e7c7b]/25 transition-all duration-250 flex flex-col justify-between"
+                              className="w-[188px] shrink-0 scroll-snap-align-start flex flex-col items-center gap-3 cursor-pointer group"
                             >
-                              {/* Illustration Area */}
-                              <div 
-                                className="h-[112px] w-full relative flex items-center justify-center overflow-hidden shrink-0"
-                                style={{ backgroundColor: config.surfaceColor }}
-                              >
-                                {/* Central emoji */}
-                                <span className="text-[52px] select-none z-10">{config.emoji}</span>
+                              {/* The Card Box (Illustration only) */}
+                              <div className="w-[188px] h-[188px] rounded-[32px] bg-[#F5FAFA] border border-[#0a3d3d]/8 shadow-[0_4px_20px_rgba(10,61,61,0.05)] relative flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-[0_12px_30px_rgba(10,61,61,0.12)] group-hover:border-[#0E7C7B]/30">
                                 
                                 {/* Radial Glow */}
                                 <div 
-                                  className="absolute inset-0 pointer-events-none"
-                                  style={{
-                                    background: `radial-gradient(circle at 50% 60%, ${config.accent}1A 0%, transparent 70%)`
-                                  }}
+                                  className="absolute inset-0 pointer-events-none opacity-20 bg-gradient-to-tr from-[#0E7C7B]/5 via-transparent to-[#E0F2F2]/10"
                                 />
+
+                                {/* Illustration */}
+                                {chapter.imageUrl ? (
+                                  <img 
+                                    src={chapter.imageUrl} 
+                                    alt={chapter.title} 
+                                    className="w-[110px] h-[110px] object-contain z-10 transition-transform duration-300 group-hover:scale-105" 
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                      const nextSibling = e.currentTarget.nextElementSibling as HTMLElement;
+                                      if (nextSibling) {
+                                        nextSibling.style.display = 'block';
+                                      }
+                                    }}
+                                  />
+                                ) : null}
+                                <div style={{ display: chapter.imageUrl ? 'none' : 'block' }} className="z-10 transition-transform duration-300 group-hover:scale-105">
+                                  <CourseIllustration subjectId={subject.id} color={config.accent} accent={config.accentLight} className="w-[84px] h-[84px]" />
+                                </div>
 
                                 {/* COMPLETED Badge */}
                                 {isCompleted && (
-                                  <div className="absolute top-[8px] right-[8px] w-6 h-6 rounded-full bg-[#0E7C7B] flex items-center justify-center shadow-xs">
-                                    <Check className="h-3.5 w-3.5 text-white stroke-[3]" />
+                                  <div className="absolute top-[12px] right-[12px] w-7 h-7 rounded-full bg-[#0E7C7B] flex items-center justify-center shadow-md border border-white/10 z-20">
+                                    <Check className="h-4 w-4 text-white stroke-[3]" />
                                   </div>
                                 )}
 
                                 {/* NOUVEAU Badge */}
                                 {isNew && !isLocked && !isCompleted && (
-                                  <div className="absolute top-[8px] left-[8px] bg-[#0E7C7B] text-white text-[10px] font-semibold py-0.5 px-2 rounded-full">
+                                  <div className="absolute top-[12px] left-[12px] bg-[#0E7C7B] text-white text-[9px] font-bold py-0.5 px-2.5 rounded-full tracking-wide shadow-sm z-20">
                                     NOUVEAU
                                   </div>
                                 )}
 
                                 {/* LOCKED Overlay */}
                                 {isLocked && (
-                                  <div className="absolute inset-0 bg-[#F5FAFA]/70 flex items-center justify-center z-20">
-                                    <Lock className="h-[22px] w-[22px] text-[#7A9E9E]" />
+                                  <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-20">
+                                    <Lock className="h-7 w-7 text-[#7A9E9E]" />
+                                  </div>
+                                )}
+
+                                {/* Progress Bar at the bottom of the card */}
+                                {!isLocked && (
+                                  <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/5 overflow-hidden">
+                                    <div 
+                                      className="h-full bg-gradient-to-r from-[#0E7C7B] to-[#5DC8C6] transition-all duration-600 ease-out"
+                                      style={{ width: `${completionPercent}%` }}
+                                    />
                                   </div>
                                 )}
                               </div>
 
-                              {/* Card Body */}
-                              <div className="p-[14px] flex-1 flex flex-col justify-between">
-                                <div>
-                                  <span className="text-[11px] font-semibold uppercase tracking-[0.05em] block mb-1" style={{ color: config.accent }}>
-                                    Niveau {chapter.level}
-                                  </span>
-                                  <h3 className="font-sans text-[15px] font-semibold text-[#0D2626] leading-[1.3] line-clamp-2 mb-1">
-                                    {chapter.title}
-                                  </h3>
-                                  <p className="text-[12px] text-[#7A9E9E] leading-[1.4] line-clamp-2 mb-[10px]">
-                                    {chapter.description}
-                                  </p>
-                                </div>
-
-                                {/* Progress Bar */}
-                                <div className="h-[3px] w-full bg-[#E0F2F2] rounded-full overflow-hidden mt-auto">
-                                  <div 
-                                    className="h-full bg-gradient-to-r from-[#0E7C7B] to-[#5DC8C6] rounded-full transition-all duration-600 ease-out"
-                                    style={{ width: `${isLocked ? 0 : completionPercent}%` }}
-                                  />
-                                </div>
+                              {/* Card Text below */}
+                              <div className="text-center px-1">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.1em] block mb-0.5" style={{ color: config.accent }}>
+                                  Niveau {chapter.level}
+                                </span>
+                                <h3 className="font-sans text-[14px] font-semibold text-[#0D2626] leading-snug line-clamp-1 group-hover:text-[#0E7C7B] transition-colors">
+                                  {chapter.title}
+                                </h3>
+                                <p className="text-[11px] text-[#7A9E9E] line-clamp-1 mt-0.5 max-w-[170px] mx-auto">
+                                  {chapter.description}
+                                </p>
                               </div>
                             </motion.div>
                           );
@@ -307,104 +331,6 @@ export default function LessonsPage() {
             })}
           </div>
         )}
-
-        {/* Autres matières Section (Not Started) */}
-        {otherSubjects.length > 0 && (
-          <div className="mt-12">
-            <div className="h-[1px] w-full bg-gradient-to-r from-[#0a3d3d]/12 to-transparent mb-[40px]" />
-            
-            <h2 className="font-sans text-[22px] font-semibold text-[#0D2626] mb-[20px]">
-              Autres matières
-            </h2>
-
-            {/* Slider with muted styles */}
-            <div className="relative group/otherSection">
-              {/* Left arrow */}
-              <button
-                onClick={() => handleScroll(otherSliderRef.current, "left")}
-                className="absolute left-[-18px] top-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full bg-white border border-[#0a3d3d]/12 shadow-[0_2px_8px_rgba(10,61,61,0.10)] text-[#3D5C5C] hover:bg-[#E0F2F2] hover:border-[#0E7C7B] hover:text-[#0A3D3D] hover:shadow-[0_4px_12px_rgba(10,61,61,0.15)] transition-all duration-150 z-10 flex items-center justify-center cursor-pointer md:opacity-0 md:group-hover/otherSection:opacity-100 hidden md:flex"
-              >
-                <ChevronLeft className="h-[18px] w-[18px]" />
-              </button>
-
-              <div
-                ref={otherSliderRef}
-                className="overflow-x-auto overflow-y-visible scrollbar-none scroll-snap-x-mandatory py-1 px-[2px] pb-[12px]"
-                style={{ WebkitOverflowScrolling: "touch" }}
-              >
-                <div className="flex gap-[14px] w-max">
-                  {otherSubjects.map((subject, index) => {
-                    const config = SUBJECT_CONFIG[subject.id] || {
-                      emoji: "📚",
-                      surfaceColor: "#EEF4FD",
-                      accent: "#7A9E9E",
-                      accentLight: "#C8E8E8",
-                      level: "FONDAMENTAL"
-                    };
-
-                    const firstChapter = MOCK_CHAPTERS.find(c => c.moduleId === subject.id);
-
-                    return (
-                      <motion.div
-                        key={subject.id}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        initial={{ opacity: 0, y: 16 }}
-                        viewport={{ once: true, margin: "-40px" }}
-                        transition={{ delay: index * 0.05, duration: 0.3 }}
-                        onClick={() => {
-                          if (firstChapter) {
-                            router.push(`/lessons/${subject.id}/${firstChapter.id}`);
-                          }
-                        }}
-                        className="w-[188px] shrink-0 scroll-snap-align-start rounded-[16px] bg-[#F5FAFA] border border-[#0a3d3d]/6 opacity-85 overflow-hidden cursor-pointer hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(10,61,61,0.12)] hover:border-[#0e7c7b]/25 transition-all duration-250 flex flex-col justify-between"
-                      >
-                        {/* Illustration Area */}
-                        <div className="h-[112px] w-full relative flex items-center justify-center overflow-hidden shrink-0 bg-[#E0F2F2]">
-                          <span className="text-[52px] select-none grayscale-[30%]">{config.emoji}</span>
-                        </div>
-
-                        {/* Card Body */}
-                        <div className="p-[14px] flex-1 flex flex-col justify-between">
-                          <div>
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] block mb-1" style={{ color: config.accent }}>
-                              {config.level}
-                            </span>
-                            <h3 className="font-sans text-[15px] font-semibold text-[#0D2626] leading-[1.3] line-clamp-2 mb-1">
-                              {subject.name}
-                            </h3>
-                            <p className="text-[12px] text-[#7A9E9E] leading-[1.4] line-clamp-2">
-                              {subject.focus}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-
-                  {/* Plus Card at end of slider */}
-                  <div
-                    onClick={() => setSearchQuery("")}
-                    className="w-[188px] h-full min-h-[220px] rounded-[16px] border-2 border-dashed border-[#0a3d3d]/15 bg-transparent flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#0E7C7B] hover:bg-[#0e7c7b]/4 group/plus transition-all duration-150"
-                  >
-                    <Plus className="h-6 w-6 text-[#7A9E9E] group-hover/plus:text-[#0E7C7B] transition-colors" />
-                    <span className="font-sans text-[13px] text-[#7A9E9E] group-hover/plus:text-[#0E7C7B] transition-colors">
-                      Explorer les matières
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right arrow */}
-              <button
-                onClick={() => handleScroll(otherSliderRef.current, "right")}
-                className="absolute right-[-18px] top-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full bg-white border border-[#0a3d3d]/12 shadow-[0_2px_8px_rgba(10,61,61,0.10)] text-[#3D5C5C] hover:bg-[#E0F2F2] hover:border-[#0E7C7B] hover:text-[#0A3D3D] hover:shadow-[0_4px_12px_rgba(10,61,61,0.15)] transition-all duration-150 z-10 flex items-center justify-center cursor-pointer md:opacity-0 md:group-hover/otherSection:opacity-100 hidden md:flex"
-              >
-                <ChevronRight className="h-[18px] w-[18px]" />
-              </button>
-            </div>
-          </div>
-        )}
-
       </main>
     </div>
   );

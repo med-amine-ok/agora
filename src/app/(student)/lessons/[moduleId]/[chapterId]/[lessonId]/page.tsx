@@ -22,68 +22,8 @@ import { getSubjectById, MOCK_CHAPTERS, MOCK_LESSON_LIST } from "../../../mockLe
 import { SUBJECT_CONFIG } from "@/lib/config/subjects";
 import LessonEndActions from "@/components/lessons/LessonEndActions";
 
-// Interactive anatomical structure details
-const HEART_REGIONS = [
-  { id: "aorte", name: "Aorte", desc: "Distribue le sang oxygéné provenant du ventricule gauche vers tout l'organisme.", color: "#E74C3C" },
-  { id: "od", name: "Oreillette Droite", desc: "Reçoit le sang désoxygéné renvoyé par les veines caves supérieure et inférieure.", color: "#3498DB" },
-  { id: "vg", name: "Ventricule Gauche", desc: "Propulse le sang oxygéné à haute pression dans la circulation systémique.", color: "#C0392B" },
-  { id: "vd", name: "Ventricule Droit", desc: "Pompe le sang désoxygéné vers la circulation pulmonaire pour le réoxygéner.", color: "#2980B9" }
-];
-
-const SECTIONS = [
-  {
-    title: "1. Introduction et anatomie globale",
-    content: `Dans cette section, nous abordons les repères anatomiques cardinaux et les rapports anatomiques. Le cœur est un muscle creux situé dans le médiastin moyen, enveloppé par le péricarde. Il est composé de quatre cavités principales fonctionnant en série pour assurer l'oxygénation pulmonaire et la perfusion systémique.`
-  },
-  {
-    title: "2. Physiopathologie et hémodynamique",
-    content: `La physiopathologie cardiaque se caractérise par l'analyse des pressions intracavitaires et vasculaires. Tout obstacle mécanique, tel qu'une sténose valvulaire ou une perte de compliance ventriculaire, va modifier la précharge et la postcharge, entraînant à terme des mécanismes de compensation hypertrophiques.`
-  },
-  {
-    title: "3. Sémiologie et examens cliniques",
-    content: `L'auscultation cardiaque permet d'identifier les bruits physiologiques (B1 et B2) ainsi que d'éventuels souffles ou bruits surajoutés (B3, B4). Ces anomalies acoustiques guident le choix des examens complémentaires, notamment l'échocardiographie transthoracique (ETT) et l'électrocardiogramme (ECG) de repos.`
-  },
-  {
-    title: "4. Cas clinique d'application",
-    content: `Patient de 64 ans se présentant aux urgences pour une dyspnée d'installation progressive associée à des œdèmes des membres inférieurs. L'auscultation révèle un râle crépitant bilatéral aux bases pulmonaires et un galop gauche (B3). Le bilan initial s'oriente vers une insuffisance cardiaque aiguë congestive.`
-  }
-];
-
-const CHECKPOINTS = [
-  {
-    sectionIndex: 0,
-    question: "Quelle cavité cardiaque reçoit en premier le sang désoxygéné de l'organisme ?",
-    options: [
-      { text: "Ventricule gauche", isCorrect: false },
-      { text: "Oreillette droite", isCorrect: true },
-      { text: "Ventricule droit", isCorrect: false },
-      { text: "Oreillette gauche", isCorrect: false }
-    ],
-    explanation: "L'oreillette droite (OD) reçoit le sang pauvre en oxygène provenant des veines caves supérieure et inférieure avant de le propulser vers le ventricule droit."
-  },
-  {
-    sectionIndex: 1,
-    question: "Quelle modification hémodynamique immédiate engendre une sténose aortique serrée ?",
-    options: [
-      { text: "Baisse de la précharge ventriculaire", isCorrect: false },
-      { text: "Augmentation de la postcharge du ventricule gauche", isCorrect: true },
-      { text: "Diminution immédiate du volume résiduel", isCorrect: false },
-      { text: "Chute de la pression artérielle pulmonaire", isCorrect: false }
-    ],
-    explanation: "Une sténose de la valve aortique crée un obstacle à l'éjection du sang du ventricule gauche, ce qui augmente directement la postcharge ventriculaire."
-  },
-  {
-    sectionIndex: 2,
-    question: "Quel bruit cardiaque correspond physiologiquement à la fermeture des valves auriculo-ventriculaires ?",
-    options: [
-      { text: "Le premier bruit (B1)", isCorrect: true },
-      { text: "Le second bruit (B2)", isCorrect: false },
-      { text: "Le troisième bruit (B3)", isCorrect: false },
-      { text: "Le quatrième bruit (B4)", isCorrect: false }
-    ],
-    explanation: "Le premier bruit (B1) est produit par la fermeture des valves mitrale et tricuspide au début de la systole ventriculaire."
-  }
-];
+// Initial default fallback region
+const DEFAULT_REGION = { id: "default", name: "Structure", desc: "Cliquez sur une zone pour en savoir plus.", color: "#7A9E9E" };
 
 export default function LessonReaderPage() {
   const params = useParams();
@@ -112,10 +52,33 @@ export default function LessonReaderPage() {
     return chapterLessons[currentLessonIndex] || chapterLessons[0] || MOCK_LESSON_LIST[0];
   }, [chapterLessons, currentLessonIndex]);
 
+  const sections = useMemo(() => {
+    return lesson?.sections || [
+      { title: "1. Contenu", content: "Contenu de la leçon en cours de préparation..." }
+    ];
+  }, [lesson]);
+
+  const checkpoints = useMemo(() => {
+    return lesson?.checkpoints || [];
+  }, [lesson]);
+
+  const regions = useMemo(() => {
+    return lesson?.anatomyData?.regions || [];
+  }, [lesson]);
+
   // Section Tracking State
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [isCompleted, setIsCompleted] = useState(lesson?.isCompleted ?? false);
-  const [selectedRegion, setSelectedRegion] = useState(HEART_REGIONS[0]);
+  const [selectedRegion, setSelectedRegion] = useState<any>(DEFAULT_REGION);
+
+  // Initialize selectedRegion when regions change
+  React.useEffect(() => {
+    if (regions.length > 0) {
+      setSelectedRegion(regions[0]);
+    } else {
+      setSelectedRegion(DEFAULT_REGION);
+    }
+  }, [regions]);
 
   // Interactive Checkpoint States
   const [checkpointAnswers, setCheckpointAnswers] = useState<Record<number, number>>({});
@@ -162,7 +125,7 @@ export default function LessonReaderPage() {
   };
 
   const handleNextSection = () => {
-    if (currentSectionIndex < SECTIONS.length - 1) {
+    if (currentSectionIndex < sections.length - 1) {
       setCurrentSectionIndex(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
@@ -176,7 +139,6 @@ export default function LessonReaderPage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
-
   // Custom heart rendering helper for the AnatomyViewer
   const renderHeartSVG = () => {
     return (
@@ -188,7 +150,7 @@ export default function LessonReaderPage() {
           d="M80 60 C80 30 120 30 120 60 L120 90 L80 90 Z" 
           fill={selectedRegion.id === "aorte" ? config.accent : config.accentLight} 
           className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
-          onClick={() => setSelectedRegion(HEART_REGIONS[0])}
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "aorte") || selectedRegion)}
         />
         
         {/* Oreillette Droite */}
@@ -196,7 +158,7 @@ export default function LessonReaderPage() {
           d="M40 80 C40 60 70 60 70 80 L70 120 L40 120 Z" 
           fill={selectedRegion.id === "od" ? "#3498DB" : "#85C1E9"} 
           className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
-          onClick={() => setSelectedRegion(HEART_REGIONS[1])}
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "od") || selectedRegion)}
         />
         
         {/* Ventricule Gauche */}
@@ -204,7 +166,7 @@ export default function LessonReaderPage() {
           d="M100 120 L160 120 C160 150 130 180 100 195 Z" 
           fill={selectedRegion.id === "vg" ? config.accent : config.accentLight} 
           className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
-          onClick={() => setSelectedRegion(HEART_REGIONS[2])}
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "vg") || selectedRegion)}
         />
         
         {/* Ventricule Droit */}
@@ -212,7 +174,7 @@ export default function LessonReaderPage() {
           d="M40 120 L100 120 L100 195 C70 180 40 150 40 120 Z" 
           fill={selectedRegion.id === "vd" ? "#2980B9" : "#5DADE2"} 
           className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
-          onClick={() => setSelectedRegion(HEART_REGIONS[3])}
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "vd") || selectedRegion)}
         />
 
         <circle cx="100" cy="50" r="4" fill="white" className="pointer-events-none" />
@@ -223,9 +185,123 @@ export default function LessonReaderPage() {
     );
   };
 
+  const renderBrainSVG = () => {
+    return (
+      <svg viewBox="0 0 200 220" className="w-full max-w-[280px] h-auto drop-shadow-md select-none">
+        {/* Cortex */}
+        <path 
+          d="M100 30 C50 30 30 70 30 110 C30 140 50 160 80 160 C90 160 100 150 100 140 C100 150 110 160 120 160 C150 160 170 140 170 110 C170 70 150 30 100 30 Z" 
+          fill={selectedRegion.id === "cortex" ? "#8E44AD" : "#D7BDE2"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "cortex") || selectedRegion)}
+        />
+        {/* Cervelet */}
+        <path 
+          d="M60 160 C40 160 40 190 70 190 C90 190 100 175 100 160 Z" 
+          fill={selectedRegion.id === "cervelet" ? "#9B59B6" : "#E8DAEF"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "cervelet") || selectedRegion)}
+        />
+        {/* Thalamus */}
+        <ellipse 
+          cx="100" cy="110" rx="25" ry="20"
+          fill={selectedRegion.id === "thalamus" ? "#E8DAEF" : "#FDF2E9"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "thalamus") || selectedRegion)}
+        />
+        {/* Tronc cérébral */}
+        <path 
+          d="M90 140 L110 140 L115 200 L85 200 Z" 
+          fill={selectedRegion.id === "tronc" ? "#D2B4DE" : "#EBDEF0"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "tronc") || selectedRegion)}
+        />
+      </svg>
+    );
+  };
+
+  const renderKidneySVG = () => {
+    return (
+      <svg viewBox="0 0 200 220" className="w-full max-w-[280px] h-auto drop-shadow-md select-none">
+        {/* Silhouette Kidney */}
+        <path 
+          d="M100 20 C150 20 170 60 170 110 C170 160 150 200 100 200 C80 200 85 160 85 110 C85 60 80 20 100 20 Z" 
+          fill={selectedRegion.id === "glome" ? "#1ABC9C" : "#A2D9CE"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "glome") || selectedRegion)}
+        />
+        {/* Tubules/Medulla area */}
+        <path 
+          d="M100 50 C130 50 140 70 140 110 C140 150 130 170 100 170 C95 170 95 150 95 110 C95 70 95 50 100 50 Z" 
+          fill={selectedRegion.id === "tubule" ? "#16A085" : "#76D7C4"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "tubule") || selectedRegion)}
+        />
+        {/* Calices */}
+        <path 
+          d="M95 80 L115 90 L115 130 L95 140 Z" 
+          fill={selectedRegion.id === "calice" ? "#76D7C4" : "#E8F8F5"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "calice") || selectedRegion)}
+        />
+        {/* Bassinet */}
+        <path 
+          d="M85 100 L100 110 L85 130 Z" 
+          fill={selectedRegion.id === "bassinet" ? "#A2D9CE" : "#E8F8F5"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "bassinet") || selectedRegion)}
+        />
+      </svg>
+    );
+  };
+
+  const renderCellSVG = () => {
+    return (
+      <svg viewBox="0 0 200 220" className="w-full max-w-[280px] h-auto drop-shadow-md select-none">
+        {/* Cell membrane */}
+        <circle 
+          cx="100" cy="110" r="80" 
+          fill={selectedRegion.id === "membrane" ? "#5DADE2" : "#EBF5FB"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-[#2980B9] stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "membrane") || selectedRegion)}
+        />
+        {/* Cytoplasm */}
+        <circle 
+          cx="100" cy="110" r="70" 
+          fill={selectedRegion.id === "cyto" ? "#AED6F1" : "#F2F8FD"} 
+          className="cursor-pointer hover:brightness-105 transition-all"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "cyto") || selectedRegion)}
+        />
+        {/* Nucleus */}
+        <circle 
+          cx="100" cy="110" r="30" 
+          fill={selectedRegion.id === "noyau" ? "#2980B9" : "#D4E6F1"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[2]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "noyau") || selectedRegion)}
+        />
+        {/* Mitochondria */}
+        <ellipse 
+          cx="60" cy="80" rx="15" ry="8" transform="rotate(30, 60, 80)"
+          fill={selectedRegion.id === "mito" ? "#3498DB" : "#A9CCE3"} 
+          className="cursor-pointer hover:brightness-105 transition-all stroke-white stroke-[1]"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "mito") || selectedRegion)}
+        />
+      </svg>
+    );
+  };
+
+  const renderAnatomySVG = () => {
+    const type = lesson?.anatomyData?.type;
+    if (type === "heart") return renderHeartSVG();
+    if (type === "brain") return renderBrainSVG();
+    if (type === "kidney") return renderKidneySVG();
+    if (type === "cell") return renderCellSVG();
+    return null;
+  };
+
   const checkpointForSection = useMemo(() => {
-    return CHECKPOINTS.find(c => c.sectionIndex === currentSectionIndex);
-  }, [currentSectionIndex]);
+    return checkpoints.find(c => c.sectionIndex === currentSectionIndex);
+  }, [checkpoints, currentSectionIndex]);
 
   return (
     <div className="relative min-h-screen bg-[#F5FAFA] pt-[56px] pb-28 font-sans text-[#0D2626] text-left">
@@ -237,7 +313,7 @@ export default function LessonReaderPage() {
           
           {/* Section Dots Progress bar */}
           <div className="flex items-center gap-[8px]">
-            {SECTIONS.map((_, idx) => {
+            {sections.map((_, idx) => {
               const isPast = idx < currentSectionIndex;
               const isCurr = idx === currentSectionIndex;
 
@@ -260,7 +336,7 @@ export default function LessonReaderPage() {
             })}
           </div>
 
-          <span className="text-[11px] font-mono font-bold text-[#0D2626]">{currentSectionIndex + 1} / {SECTIONS.length}</span>
+          <span className="text-[11px] font-mono font-bold text-[#0D2626]">{currentSectionIndex + 1} / {sections.length}</span>
         </div>
       </div>
 
@@ -316,26 +392,26 @@ export default function LessonReaderPage() {
           {/* Section title & content */}
           <div className="space-y-4">
             <h3 className="font-display text-[20px] font-bold text-[#0D2626]">
-              {SECTIONS[currentSectionIndex].title}
+              {sections[currentSectionIndex]?.title}
             </h3>
             <p className="text-sm leading-relaxed text-[#0D2626] whitespace-pre-line font-sans">
-              {SECTIONS[currentSectionIndex].content}
+              {sections[currentSectionIndex]?.content}
             </p>
           </div>
 
           {/* Interactive Anatomical Viewer Area (Section 0 specific) */}
-          {lesson.hasAnatomy && currentSectionIndex === 0 && (
+          {lesson.hasAnatomy && currentSectionIndex === 0 && lesson.anatomyData && (
             <div className="rounded-[20px] border border-[#0a3d3d]/8 bg-[#F5FAFA] p-5 flex flex-col md:flex-row items-center gap-6">
               {/* SVG Image Area */}
               <div className="shrink-0 flex items-center justify-center bg-white p-4 rounded-xl border border-[#0a3d3d]/6">
-                {renderHeartSVG()}
+                {renderAnatomySVG()}
               </div>
 
               {/* Informational Panel */}
               <div className="flex-1 space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E0F2F2] text-[#0E7C7B] text-[12px] font-bold">
-                    🫀
+                    {lesson.anatomyData.type === "heart" ? "🫀" : lesson.anatomyData.type === "brain" ? "🧠" : lesson.anatomyData.type === "kidney" ? "🩺" : "🧬"}
                   </span>
                   <h4 className="font-sans text-[14px] font-bold text-[#0D2626]">
                     Modèle Anatomique Interactif
@@ -343,7 +419,13 @@ export default function LessonReaderPage() {
                 </div>
 
                 <p className="text-[12px] text-[#7A9E9E] leading-relaxed">
-                  Cliquez sur les différentes cavités du cœur à gauche pour explorer leurs caractéristiques.
+                  {lesson.anatomyData.type === "heart" 
+                    ? "Cliquez sur les différentes cavités du cœur à gauche pour explorer leurs caractéristiques."
+                    : lesson.anatomyData.type === "brain"
+                      ? "Cliquez sur les différentes zones du cerveau à gauche pour explorer leurs caractéristiques."
+                      : lesson.anatomyData.type === "kidney"
+                        ? "Cliquez sur les différentes structures rénales à gauche pour explorer leurs caractéristiques."
+                        : "Cliquez sur les différents organites de la cellule pour explorer leurs caractéristiques."}
                 </p>
 
                 <div className="rounded-xl border border-[#0a3d3d]/8 bg-white p-3.5 space-y-1">
@@ -479,21 +561,27 @@ export default function LessonReaderPage() {
           </AnimatePresence>
 
           {/* Last section summary box */}
-          {currentSectionIndex === SECTIONS.length - 1 && (
+          {currentSectionIndex === sections.length - 1 && (
             <div className="rounded-[20px] bg-[#E0F2F2]/40 border border-[#0E7C7B]/20 p-5 space-y-3">
               <h4 className="font-display text-[15px] font-bold text-[#0D2626] flex items-center gap-2">
                 <span>📚</span> Synthèse & Points Clés
               </h4>
               <ul className="list-disc list-inside text-xs leading-relaxed text-[#3D5C5C] space-y-1.5 pl-1">
-                <li>Le cœur s'organise en quatre cavités distinctes et asymétriques.</li>
-                <li>L'hémodynamique repose sur l'alternance d'ouverture/fermeture valvulaire.</li>
-                <li>L'auscultation B1-B2 reste le pilier fondamental de la sémiologie d'urgence.</li>
+                {lesson.summaryPoints?.map((pt: string, idx: number) => (
+                  <li key={idx}>{pt}</li>
+                )) || (
+                  <>
+                    <li>Le cœur s'organise en quatre cavités distinctes et asymétriques.</li>
+                    <li>L'hémodynamique repose sur l'alternance d'ouverture/fermeture valvulaire.</li>
+                    <li>L'auscultation B1-B2 reste le pilier fondamental de la sémiologie d'urgence.</li>
+                  </>
+                )}
               </ul>
             </div>
           )}
 
           {/* End-of-lesson action cards */}
-          {currentSectionIndex === SECTIONS.length - 1 && (
+          {currentSectionIndex === sections.length - 1 && (
             <LessonEndActions
               moduleId={moduleId}
               chapterId={chapterId}
@@ -526,7 +614,7 @@ export default function LessonReaderPage() {
 
           {/* Mid progress info */}
           <span className="text-[11px] font-semibold text-[#7A9E9E] font-mono uppercase">
-            Section {currentSectionIndex + 1} de {SECTIONS.length}
+            Section {currentSectionIndex + 1} de {sections.length}
           </span>
 
           {/* Next / Terminer Button */}
@@ -535,7 +623,7 @@ export default function LessonReaderPage() {
             className="inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-xs font-semibold text-white hover:brightness-105 transition-all shadow-xs cursor-pointer"
             style={{ backgroundColor: config.accent }}
           >
-            <span>{currentSectionIndex === SECTIONS.length - 1 ? "Terminer" : "Suivant"}</span>
+            <span>{currentSectionIndex === sections.length - 1 ? "Terminer" : "Suivant"}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
