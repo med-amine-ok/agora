@@ -12,12 +12,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-dark text-white-custom">
-                <Activity className="h-4.5 w-4.5 text-accent animate-pulse" />
-              </div>
-              <span className="font-display text-lg font-bold tracking-tight text-teal-dark">
-                Agora
-              </span>
+              <img src="/agoraLogo.png" alt="Agora Logo" className="h-16 w-16 object-contain" />
             </Link>
             <p className="text-xs text-text-light max-w-sm leading-relaxed">
               Agora est une plateforme d'éducation médicale premium conçue exclusivement pour les étudiants en médecine algériens préparant leurs examens de modules, cycles cliniques et le concours national du Résidanat.

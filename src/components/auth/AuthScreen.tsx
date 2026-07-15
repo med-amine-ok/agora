@@ -104,25 +104,15 @@ export default function AuthScreen({ mode }: AuthScreenProps) {
 
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center text-center">
-          <div
-            className={`flex h-12 w-12 items-center justify-center rounded-xl transition-all shadow-md ${
-              isLogin && activeRole === "admin"
-                ? "bg-white-custom text-teal-dark"
-                : "bg-teal-dark text-white-custom"
-            }`}
-          >
-            <Activity
-              className={`h-6 w-6 stroke-[2] ${
-                isLogin && activeRole === "admin" ? "text-accent" : "text-teal-light"
-              }`}
-            />
+          <div className="flex h-24 w-24 items-center justify-center p-1">
+            <img src="/agoraLogo.png" alt="Agora Logo" className="h-full w-full object-contain" />
           </div>
           <h2
             className={`mt-4 font-display text-2xl font-bold tracking-tight ${
               isLogin && activeRole === "admin" ? "text-white-custom" : "text-text-dark"
             }`}
           >
-            {isLogin ? "Identifiants Agora" : "Créer votre compte Agora"}
+            {isLogin ? " " : "Créer votre compte Agora"}
           </h2>
           <p
             className={`text-xs mt-1 ${

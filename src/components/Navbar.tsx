@@ -43,12 +43,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-dark text-white-custom transition-all group-hover:bg-teal">
-              <Activity className="h-5 w-5 stroke-[2] text-accent animate-pulse" />
-            </div>
-            <span className="font-display text-xl font-bold tracking-tight text-teal-dark group-hover:text-teal transition-all">
-              Agora
-            </span>
+            <img src="/agoraLogo.png" alt="Agora Logo" className="h-20 w-20 object-contain" />
           </Link>
 
           {/* Desktop Navigation */}

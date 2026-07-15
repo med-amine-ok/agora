@@ -73,12 +73,7 @@ export default function Topbar() {
         {/* Zone 1 — Logo (Left) */}
         <div className="flex items-center">
           <Link href="/dashboard" className="flex items-center gap-2 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-dark text-white-custom transition-all group-hover:scale-105">
-              <Activity className="h-4.5 w-4.5 stroke-[2.5] text-accent animate-pulse" />
-            </div>
-            <span className="font-display text-base font-bold tracking-tight text-teal-dark">
-              Agora
-            </span>
+            <img src="/agoraLogo.png" alt="Agora Logo" className="h-12 w-12 object-contain" />
           </Link>
         </div>
 

@@ -73,12 +73,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Header logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-border-custom">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-teal text-white-custom shrink-0 shadow-sm">
-                <Activity className="h-4.5 w-4.5 stroke-[2.5]" />
-              </div>
+              <img src="/agoraLogo.png" alt="Agora Logo" className="h-12 w-12 object-contain shrink-0" />
               {!isCollapsed && (
                 <span className="font-display font-bold text-sm tracking-widest text-teal-dark uppercase">
-                  AGORA ADMIN
+                  ADMIN
                 </span>
               )}
             </div>
@@ -152,11 +150,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div>
                 <div className="h-16 flex items-center justify-between px-4 border-b border-border-custom">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded bg-teal text-white-custom">
-                      <Activity className="h-4.5 w-4.5 stroke-[2.5]" />
-                    </div>
+                    <img src="/agoraLogo.png" alt="Agora Logo" className="h-12 w-12 object-contain" />
                     <span className="font-display font-bold text-sm tracking-widest text-teal-dark uppercase">
-                      AGORA ADMIN
+                      ADMIN
                     </span>
                   </div>
                   <button
