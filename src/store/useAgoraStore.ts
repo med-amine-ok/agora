@@ -6,6 +6,10 @@ export interface User {
   streak: number;
   points: number;
   badges: string[];
+  username?: string;
+  phone?: string;
+  university?: string;
+  yearOfStudy?: string;
 }
 
 export interface Player {
@@ -30,7 +34,7 @@ export interface AgoraState {
   
   // Actions
   setRole: (role: "student" | "admin" | null) => void;
-  login: (name: string, role: "student" | "admin") => void;
+  login: (name: string, role: "student" | "admin", extra?: Partial<User>) => void;
   logout: () => void;
   completeCheckpoint: (lessonId: string, checkpointIndex: number) => void;
   resetLessonProgress: () => void;
@@ -71,13 +75,14 @@ export const useAgoraStore = create<AgoraState>((set) => ({
   chatMessages: [],
 
   setRole: (role) => set({ selectedRole: role }),
-  login: (name, role) => set({
+  login: (name, role, extra) => set({
     user: {
       name,
       role,
       streak: role === "student" ? 1 : 0,
       points: 0,
       badges: [],
+      ...extra
     },
     selectedRole: role,
   }),
