@@ -290,12 +290,145 @@ export default function LessonReaderPage() {
     );
   };
 
+  const renderSkeletonSVG = () => {
+    const isAxial = selectedRegion.id === "axial";
+    const isAppendicular = selectedRegion.id === "appendiculaire";
+    const isScapular = selectedRegion.id === "scapulaire";
+    const isPelvic = selectedRegion.id === "pelvienne";
+
+    return (
+      <svg viewBox="0 0 200 220" className="w-full max-w-[280px] h-auto drop-shadow-md select-none">
+        {/* Background silhouette for human body structure context */}
+        <path
+          d="M100 12 C112 12 120 22 120 34 C120 42 128 46 136 50 C155 58 172 90 172 125 C172 135 158 140 152 125 C146 110 142 90 142 85 L140 120 L145 210 C145 215 135 215 130 210 L120 155 L108 150 L108 210 C108 215 92 215 92 210 L92 150 L80 155 L70 210 C65 215 55 215 55 210 L60 120 L58 85 C58 90 54 110 48 125 C42 140 28 135 28 125 C28 90 45 58 64 50 C72 46 80 42 80 34 C80 22 88 12 100 12 Z"
+          fill="#EEF4FD"
+          opacity="0.5"
+        />
+
+        {/* 1. SQUELETTE AXIAL (Tête, Colonne, Cage Thoracique, Sternum) */}
+        <g 
+          className="cursor-pointer transition-all duration-200 hover:opacity-90"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "axial") || selectedRegion)}
+        >
+          {/* Crâne */}
+          <circle 
+            cx="100" 
+            cy="32" 
+            r="12" 
+            fill={isAxial ? "#E67E22" : "#F5CBA7"} 
+            stroke="white" 
+            strokeWidth="1.5" 
+          />
+          {/* Colonne Vertébrale */}
+          <path 
+            d="M 100 44 L 100 108" 
+            stroke={isAxial ? "#E67E22" : "#F5CBA7"} 
+            strokeWidth="5" 
+            strokeLinecap="round" 
+          />
+          {/* Cage Thoracique */}
+          <path 
+            d="M 85 58 Q 100 53 115 58 M 82 68 Q 100 63 118 68 M 80 78 Q 100 73 120 78 M 82 88 Q 100 83 118 88 M 85 98 Q 100 93 115 98" 
+            fill="none" 
+            stroke={isAxial ? "#D35400" : "#F8C471"} 
+            strokeWidth="3.5" 
+            strokeLinecap="round" 
+          />
+          {/* Sternum */}
+          <line 
+            x1="100" 
+            y1="55" 
+            x2="100" 
+            y2="92" 
+            stroke={isAxial ? "#E67E22" : "#F5CBA7"} 
+            strokeWidth="4" 
+          />
+        </g>
+
+        {/* 2. CEINTURE SCAPULAIRE */}
+        <g 
+          className="cursor-pointer transition-all duration-200 hover:opacity-90"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "scapulaire") || selectedRegion)}
+        >
+          {/* Clavicules */}
+          <path 
+            d="M 76 48 Q 100 53 124 48" 
+            fill="none" 
+            stroke={isScapular ? "#2980B9" : "#AED6F1"} 
+            strokeWidth="3" 
+            strokeLinecap="round" 
+          />
+          {/* Scapulas */}
+          <path 
+            d="M 72 50 L 68 64 L 78 60 Z" 
+            fill={isScapular ? "#2980B9" : "#AED6F1"} 
+            stroke="white" 
+            strokeWidth="1" 
+          />
+          <path 
+            d="M 128 50 L 132 64 L 122 60 Z" 
+            fill={isScapular ? "#2980B9" : "#AED6F1"} 
+            stroke="white" 
+            strokeWidth="1" 
+          />
+        </g>
+
+        {/* 3. CEINTURE PELVIENNE */}
+        <g 
+          className="cursor-pointer transition-all duration-200 hover:opacity-90"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "pelvienne") || selectedRegion)}
+        >
+          {/* Os Coxal / Bassin */}
+          <path 
+            d="M 82 108 C 82 125 118 125 118 108 C 118 102 82 102 82 108 Z" 
+            fill={isPelvic ? "#8E44AD" : "#D7BDE2"} 
+            stroke="white" 
+            strokeWidth="1.5" 
+          />
+          <path 
+            d="M 94 105 L 106 105 L 100 120 Z" 
+            fill={isPelvic ? "#8E44AD" : "#D7BDE2"} 
+          />
+        </g>
+
+        {/* 4. SQUELETTE APPENDICULAIRE (Membres Supérieurs & Inférieurs) */}
+        <g 
+          className="cursor-pointer transition-all duration-200 hover:opacity-90"
+          onClick={() => setSelectedRegion(regions.find(r => r.id === "appendiculaire") || selectedRegion)}
+        >
+          {/* Membres supérieurs (Bras gauche et droit) */}
+          {/* Humérus */}
+          <line x1="72" y1="52" x2="62" y2="85" stroke={isAppendicular ? "#27AE60" : "#A9DFBF"} strokeWidth="4.5" strokeLinecap="round" />
+          <line x1="128" y1="52" x2="138" y2="85" stroke={isAppendicular ? "#27AE60" : "#A9DFBF"} strokeWidth="4.5" strokeLinecap="round" />
+          {/* Radius / Ulna */}
+          <line x1="62" y1="85" x2="52" y2="120" stroke={isAppendicular ? "#27AE60" : "#A9DFBF"} strokeWidth="3.5" strokeLinecap="round" />
+          <line x1="138" y1="85" x2="148" y2="120" stroke={isAppendicular ? "#27AE60" : "#A9DFBF"} strokeWidth="3.5" strokeLinecap="round" />
+          {/* Mains */}
+          <circle cx="50" cy="124" r="3" fill={isAppendicular ? "#27AE60" : "#A9DFBF"} />
+          <circle cx="150" cy="124" r="3" fill={isAppendicular ? "#27AE60" : "#A9DFBF"} />
+
+          {/* Membres inférieurs (Jambes gauche et droite) */}
+          {/* Fémurs */}
+          <line x1="88" y1="118" x2="80" y2="158" stroke={isAppendicular ? "#27AE60" : "#A9DFBF"} strokeWidth="5.5" strokeLinecap="round" />
+          <line x1="112" y1="118" x2="120" y2="158" stroke={isAppendicular ? "#27AE60" : "#A9DFBF"} strokeWidth="5.5" strokeLinecap="round" />
+          {/* Tibia / Fibula */}
+          <line x1="80" y1="158" x2="76" y2="198" stroke={isAppendicular ? "#27AE60" : "#A9DFBF"} strokeWidth="4.5" strokeLinecap="round" />
+          <line x1="120" y1="158" x2="124" y2="198" stroke={isAppendicular ? "#27AE60" : "#A9DFBF"} strokeWidth="4.5" strokeLinecap="round" />
+          {/* Pieds */}
+          <path d="M 76 198 L 68 202 L 76 202 Z" fill={isAppendicular ? "#27AE60" : "#A9DFBF"} />
+          <path d="M 124 198 L 132 202 L 124 202 Z" fill={isAppendicular ? "#27AE60" : "#A9DFBF"} />
+        </g>
+      </svg>
+    );
+  };
+
   const renderAnatomySVG = () => {
     const type = lesson?.anatomyData?.type;
     if (type === "heart") return renderHeartSVG();
     if (type === "brain") return renderBrainSVG();
     if (type === "kidney") return renderKidneySVG();
     if (type === "cell") return renderCellSVG();
+    if (type === "skeleton") return renderSkeletonSVG();
     return null;
   };
 
@@ -411,7 +544,15 @@ export default function LessonReaderPage() {
               <div className="flex-1 space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#E0F2F2] text-[#0E7C7B] text-[12px] font-bold">
-                    {lesson.anatomyData.type === "heart" ? "🫀" : lesson.anatomyData.type === "brain" ? "🧠" : lesson.anatomyData.type === "kidney" ? "🩺" : "🧬"}
+                    {lesson.anatomyData.type === "heart" 
+                      ? "🫀" 
+                      : lesson.anatomyData.type === "brain" 
+                        ? "🧠" 
+                        : lesson.anatomyData.type === "kidney" 
+                          ? "🫘" 
+                          : lesson.anatomyData.type === "skeleton"
+                            ? "🦴"
+                            : "🧬"}
                   </span>
                   <h4 className="font-sans text-[14px] font-bold text-[#0D2626]">
                     Modèle Anatomique Interactif
@@ -425,7 +566,9 @@ export default function LessonReaderPage() {
                       ? "Cliquez sur les différentes zones du cerveau à gauche pour explorer leurs caractéristiques."
                       : lesson.anatomyData.type === "kidney"
                         ? "Cliquez sur les différentes structures rénales à gauche pour explorer leurs caractéristiques."
-                        : "Cliquez sur les différents organites de la cellule pour explorer leurs caractéristiques."}
+                        : lesson.anatomyData.type === "skeleton"
+                          ? "Cliquez sur les différentes parties du squelette à gauche pour explorer leurs caractéristiques."
+                          : "Cliquez sur les différents organites de la cellule pour explorer leurs caractéristiques."}
                 </p>
 
                 <div className="rounded-xl border border-[#0a3d3d]/8 bg-white p-3.5 space-y-1">

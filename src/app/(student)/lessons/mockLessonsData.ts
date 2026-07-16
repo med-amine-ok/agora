@@ -61,7 +61,7 @@ const SUBJECT_SEEDS: SubjectSeed[] = [
     color: "#1f8476",
     difficulty: "Moyen",
     focus: "ECG, douleur thoracique et insuffisance cardiaque",
-    imageUrl: "https://www.svgrepo.com/show/404696/a-button-blood-type.svg",
+    imageUrl: "https://www.svgrepo.com/show/404718/anatomical-heart.svg",
   },
   {
     id: "neurologie",
@@ -72,7 +72,7 @@ const SUBJECT_SEEDS: SubjectSeed[] = [
     color: "#8E44AD",
     difficulty: "Difficile",
     focus: "sémiologie neurologique et urgence vasculaire",
-    imageUrl: "https://www.svgrepo.com/show/404718/anatomical-heart.svg",
+    imageUrl: "https://api.iconify.design/noto/brain.svg",
   },
   {
     id: "biochimie",
@@ -83,7 +83,7 @@ const SUBJECT_SEEDS: SubjectSeed[] = [
     color: "#2980B9",
     difficulty: "Difficile",
     focus: "métabolisme, enzymes et interprétation biologique",
-    imageUrl: "https://www.svgrepo.com/show/404718/anatomical-heart.svg",
+    imageUrl: "https://api.iconify.design/noto/dna.svg",
   },
   {
     id: "anatomie",
@@ -94,7 +94,7 @@ const SUBJECT_SEEDS: SubjectSeed[] = [
     color: "#E67E22",
     difficulty: "Difficile",
     focus: "repères anatomiques et coupes de référence",
-    imageUrl: "https://www.svgrepo.com/show/404718/anatomical-heart.svg",
+    imageUrl: "https://api.iconify.design/noto/bone.svg",
   },
   {
     id: "physiologie",
@@ -105,7 +105,7 @@ const SUBJECT_SEEDS: SubjectSeed[] = [
     color: "#27AE60",
     difficulty: "Moyen",
     focus: "régulation des grandes fonctions et homéostasie",
-    imageUrl: "https://www.svgrepo.com/show/404718/anatomical-heart.svg",
+    imageUrl: "https://api.iconify.design/noto/lungs.svg",
   },
   {
     id: "hematologie",
@@ -116,7 +116,7 @@ const SUBJECT_SEEDS: SubjectSeed[] = [
     color: "#C0392B",
     difficulty: "Moyen",
     focus: "anémie, coagulation et lecture de NFS",
-    imageUrl: "https://www.svgrepo.com/show/404718/anatomical-heart.svg",
+    imageUrl: "https://api.iconify.design/noto/drop-of-blood.svg",
   },
   {
     id: "nephrologie",
@@ -127,7 +127,7 @@ const SUBJECT_SEEDS: SubjectSeed[] = [
     color: "#1ABC9C",
     difficulty: "Difficile",
     focus: "filtration glomérulaire et troubles hydro-électrolytiques",
-    imageUrl: "https://www.svgrepo.com/show/404718/anatomical-heart.svg",
+    imageUrl: "https://api.iconify.design/noto/stethoscope.svg",
   },
   {
     id: "pharmacologie",
@@ -138,7 +138,7 @@ const SUBJECT_SEEDS: SubjectSeed[] = [
     color: "#F39C12",
     difficulty: "Moyen",
     focus: "mécanismes d'action et effets indésirables",
-    imageUrl: "https://www.svgrepo.com/show/404718/anatomical-heart.svg",
+    imageUrl: "https://api.iconify.design/noto/pill.svg",
   },
   {
     id: "microbiologie",
@@ -265,15 +265,13 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "L'ECG",
       desc: "Lecture et interprétation de l'électrocardiogramme",
       icon: "Zap",
-      imageUrl:
-        "https://www.svgrepo.com/show/284232/cardiogram-electrocardiogram.svg",
+      imageUrl: "https://www.svgrepo.com/show/284232/cardiogram-electrocardiogram.svg",
     },
     {
       title: "Pathologies Cardiaques",
       desc: "Les principales maladies cardiovasculaires",
       icon: "ShieldAlert",
-      imageUrl:
-        "https://www.svgrepo.com/show/483383/heartbeat-medical-heartbeat-line.svg",
+      imageUrl: "https://www.svgrepo.com/show/483383/heartbeat-medical-heartbeat-line.svg",
     },
   ],
   neurologie: [
@@ -281,19 +279,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Sémiologie neurologique",
       desc: "Examen clinique et repères anatomiques",
       icon: "Brain",
-      imageUrl: "/images/chapters/neurologie-c1.png",
+      imageUrl: "https://api.iconify.design/noto/brain.svg",
     },
     {
       title: "Urgences vasculaires",
       desc: "AVC ischémique, hémorragique et AIT",
       icon: "Activity",
-      imageUrl: "/images/chapters/neurologie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/ambulance.svg",
     },
     {
       title: "Pathologies neurodégénératives",
       desc: "Maladies d'Alzheimer et de Parkinson",
       icon: "Users",
-      imageUrl: "/images/chapters/neurologie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/man-health-worker.svg",
     },
   ],
   biochimie: [
@@ -301,19 +299,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Métabolisme des glucides",
       desc: "Glycolyse, cycle de Krebs et néoglucogenèse",
       icon: "Layers",
-      imageUrl: "/images/chapters/biochimie-c1.png",
+      imageUrl: "https://api.iconify.design/noto/dna.svg",
     },
     {
       title: "Enzymologie clinique",
       desc: "Cinétique enzymatique et biomarqueurs",
       icon: "Percent",
-      imageUrl: "/images/chapters/biochimie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/petri-dish.svg",
     },
     {
       title: "Lipides et lipoprotéines",
       desc: "Structure, transport et dyslipidémies",
       icon: "Circle",
-      imageUrl: "/images/chapters/biochimie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/test-tube.svg",
     },
   ],
   anatomie: [
@@ -321,19 +319,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Repères osseux",
       desc: "Ostéologie générale et squelette axial",
       icon: "Bone",
-      imageUrl: "/images/chapters/anatomie-c1.png",
+      imageUrl: "https://api.iconify.design/noto/bone.svg",
     },
     {
       title: "Système musculaire",
       desc: "Myologie des membres et du tronc",
       icon: "Activity",
-      imageUrl: "/images/chapters/anatomie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/flexed-biceps.svg",
     },
     {
       title: "Anatomie topographique",
       desc: "Coupes anatomiques de référence",
       icon: "Map",
-      imageUrl: "/images/chapters/anatomie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/x-ray.svg",
     },
   ],
   physiologie: [
@@ -341,19 +339,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Homéostasie",
       desc: "Mécanismes de régulation et milieux intérieurs",
       icon: "Cpu",
-      imageUrl: "/images/chapters/physiologie-c1.png",
+      imageUrl: "https://api.iconify.design/noto/test-tube.svg",
     },
     {
       title: "Physiologie rénale",
       desc: "Filtration glomérulaire et équilibre hydrique",
       icon: "Droplets",
-      imageUrl: "/images/chapters/physiologie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/drop-of-blood.svg",
     },
     {
       title: "Physiologie respiratoire",
       desc: "Échanges gazeux et contrôle ventilatoire",
       icon: "Wind",
-      imageUrl: "/images/chapters/physiologie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/lungs.svg",
     },
   ],
   hematologie: [
@@ -361,19 +359,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Hémogramme",
       desc: "Lecture et interprétation de la NFS",
       icon: "FileText",
-      imageUrl: "/images/chapters/hematologie-c1.png",
+      imageUrl: "https://api.iconify.design/noto/clipboard.svg",
     },
     {
       title: "Anémies",
       desc: "Physiopathologie et démarche diagnostique",
       icon: "Shield",
-      imageUrl: "/images/chapters/hematologie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/syringe.svg",
     },
     {
       title: "Hémostase",
       desc: "Coagulation et troubles thromboemboliques",
       icon: "Loader",
-      imageUrl: "/images/chapters/hematologie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/adhesive-bandage.svg",
     },
   ],
   nephrologie: [
@@ -381,19 +379,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Filtration rénale",
       desc: "Glomérule, tubules et clairance",
       icon: "Filter",
-      imageUrl: "/images/chapters/nephrologie-c1.png",
+      imageUrl: "https://api.iconify.design/noto/petri-dish.svg",
     },
     {
       title: "Insuffisance rénale",
       desc: "Formes aiguës et chroniques",
       icon: "TrendingDown",
-      imageUrl: "/images/chapters/nephrologie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/stethoscope.svg",
     },
     {
       title: "Troubles ioniques",
       desc: "Dysnatrémies et dyskaliémies",
       icon: "Activity",
-      imageUrl: "/images/chapters/nephrologie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/dna.svg",
     },
   ],
   pharmacologie: [
@@ -401,19 +399,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Pharmacocinétique",
       desc: "Absorption, distribution, métabolisme, élimination",
       icon: "FastForward",
-      imageUrl: "/images/chapters/pharmacologie-c1.png",
+      imageUrl: "https://api.iconify.design/noto/pill.svg",
     },
     {
       title: "Pharmacodynamie",
       desc: "Récepteurs, agonistes et antagonistes",
       icon: "Sliders",
-      imageUrl: "/images/chapters/pharmacologie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/syringe.svg",
     },
     {
       title: "Classes thérapeutiques",
       desc: "Antibiotiques, antihypertenseurs et antalgiques",
       icon: "FolderPlus",
-      imageUrl: "/images/chapters/pharmacologie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/test-tube.svg",
     },
   ],
   microbiologie: [
@@ -421,19 +419,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Bactériologie",
       desc: "Structure bactérienne et coloration de Gram",
       icon: "Grid",
-      imageUrl: "/images/chapters/microbiologie-c1.png",
+      imageUrl: "https://www.svgrepo.com/show/418519/bacteria.svg",
     },
     {
       title: "Virologie médicale",
       desc: "Cycles viraux et principales infections",
       icon: "GitBranch",
-      imageUrl: "/images/chapters/microbiologie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/microbe.svg",
     },
     {
       title: "Agents infectieux",
       desc: "Parasites, champignons et diagnostic",
       icon: "EyeOff",
-      imageUrl: "/images/chapters/microbiologie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/microscope.svg",
     },
   ],
   pathologie: [
@@ -441,19 +439,19 @@ const CHAPTER_SEEDS: Record<string, ChapterSeed[]> = {
       title: "Lésions cellulaires",
       desc: "Apoptose, nécrose et adaptations",
       icon: "XCircle",
-      imageUrl: "/images/chapters/pathologie-c1.png",
+      imageUrl: "https://www.svgrepo.com/show/339739/cell.svg",
     },
     {
       title: "Inflammation",
       desc: "Phases aiguë et chronique, réparation",
       icon: "Flame",
-      imageUrl: "/images/chapters/pathologie-c2.png",
+      imageUrl: "https://api.iconify.design/noto/adhesive-bandage.svg",
     },
     {
       title: "Processus tumoraux",
       desc: "Néoplasies bénignes et malignes",
       icon: "TrendingUp",
-      imageUrl: "/images/chapters/pathologie-c3.png",
+      imageUrl: "https://api.iconify.design/noto/x-ray.svg",
     },
   ],
 };
@@ -520,6 +518,7 @@ const LESSON_SEEDS: Record<string, LessonSeed[]> = {
   ],
 
   "Repères osseux": [
+    { title: "Le système squelettique", icon: "Bone" },
     { title: "Crâne et face", icon: "Smile" },
     { title: "Colonne vertébrale", icon: "Layers" },
     { title: "Bassin", icon: "Box" },
@@ -622,7 +621,7 @@ export const MOCK_LESSON_LIST: LessonListItem[] = [];
 
 // Helper functions for content generation
 function getAnatomyData(moduleId: string): AnatomyData | undefined {
-  if (moduleId === "cardiologie" || moduleId === "anatomie") {
+  if (moduleId === "cardiologie") {
     return {
       type: "heart",
       regions: [
@@ -649,6 +648,37 @@ function getAnatomyData(moduleId: string): AnatomyData | undefined {
           name: "Ventricule Droit",
           desc: "Pompe le sang désoxygéné vers la circulation pulmonaire pour le réoxygéner.",
           color: "#2980B9",
+        },
+      ],
+    };
+  }
+  if (moduleId === "anatomie") {
+    return {
+      type: "skeleton",
+      regions: [
+        {
+          id: "axial",
+          name: "Squelette Axial",
+          desc: "Forme l'axe central du corps (80 os). Il comprend le crâne, la colonne vertébrale, les côtes et le sternum. Sa fonction principale est de soutenir le tronc et de protéger les organes vitaux (cerveau, moelle épinière, cœur, poumons).",
+          color: "#E67E22",
+        },
+        {
+          id: "appendiculaire",
+          name: "Squelette Appendiculaire",
+          desc: "Comprend les os des membres supérieurs et inférieurs (126 os). Il permet la locomotion, la préhension et la réalisation de mouvements dans l'espace.",
+          color: "#27AE60",
+        },
+        {
+          id: "scapulaire",
+          name: "Ceinture Scapulaire",
+          desc: "Constituée de la clavicule et de la scapula (omoplate). Elle ancre solidement le membre supérieur au squelette axial tout en lui offrant une mobilité maximale.",
+          color: "#2980B9",
+        },
+        {
+          id: "pelvienne",
+          name: "Ceinture Pelvienne",
+          desc: "Formée par les os coxaux (bassin) et le sacrum. Elle transmet le poids du corps aux membres inférieurs et protège les organes génito-urinaires.",
+          color: "#8E44AD",
         },
       ],
     };
@@ -848,9 +878,175 @@ function generateLessonContent(
             { text: "Le quatrième bruit (B4)", isCorrect: false },
           ],
           explanation:
-            "Le premier bruit (B1) est produit par la fermeture des valves mitrale et tricuspide au début de la systole ventriculaire.",
+            "Le premier bruit (B1) is produced by the closure of the mitral and tricuspid valves at the start of ventricular systole.",
         },
       ],
+    };
+  }
+
+  // Realistic anatomy lesson data for skeletal system
+  if (
+    moduleId === "anatomie" &&
+    chapterTitle === "Repères osseux" &&
+    lessonTitle === "Le système squelettique"
+  ) {
+    return {
+      sections: [
+        {
+          title: "1. Introduction, Définitions et Rôle Fonctionnel du Cartilage",
+          content: `### 1- Introduction
+Le squelette humain est la charpente osseuse qui soutient le corps et protège les organes internes. Il se compose d’un ensemble d’os et de cartilages.
+Le terme **ostéologie** signifie l’étude des os. À l'âge adulte, le squelette est composé de **206 os** constants et pèse environ **20 % du poids du corps**. Des os surnuméraires peuvent exister ; ce sont des os inconstants (surnuméraires).
+
+### 2- Définitions
+* **L’os** : C'est un tissu conjonctif hautement spécialisé et rigide formé par des cellules appelées ostéocytes. *Exemples : les os du crâne, les os des membres, etc.*
+* **Le cartilage** : C'est un tissu conjonctif élastique et semi-rigide, formé par des cellules appelées chondrocytes. Il est dépourvu de nerfs et de vaisseaux sanguins. On distingue trois types de tissus cartilagineux :
+  1. **Le cartilage hyalin** : Formé par des chondrocytes sphériques, riche en fibres de collagène, il est le plus répandu dans le corps humain. On le trouve au niveau :
+     - Des articulations : c’est le cartilage articulaire.
+     - Des côtes : c’est le cartilage costal.
+     - Du larynx : forme le squelette laryngé.
+     - De la trachée et des bronches : forme les conduits trachéaux-bronchiques.
+     - Du nez : c’est le cartilage nasal.
+  2. **Le cartilage élastique** : Contient des fibres élastiques. On le trouve au niveau de l’oreille externe et de l’épiglotte du larynx.
+  3. **Le cartilage fibreux (ou fibrocartilage)** : Formé par une alternance de chondrocytes et de faisceaux de fibres de collagène épais. On le trouve dans les zones de compressions et d’étirements, par exemple : les disques intervertébraux, les ménisques des genoux et les labrums.
+
+### 3- Anatomie fonctionnelle des cartilages
+Le rôle essentiel du cartilage est mécanique : il protège les surfaces articulaires de l’usure et donne attache à certains muscles. Il permet également la perméabilité permanente de certains conduits comme la trachée.`,
+        },
+        {
+          title: "2. Constitution du Squelette et Classification Morphologique des Os",
+          content: `### 4- Constitution du squelette humain
+Le squelette est formé d’un squelette axial sur lequel se fixe le squelette appendiculaire.
+* **Le squelette axial** : Forme l’axe du corps et le supporte. Il comprend :
+  - Les os du crâne et de la face.
+  - L’os hyoïde.
+  - La colonne vertébrale.
+  - Les côtes et le sternum (la cage thoracique).
+* **Le squelette appendiculaire** : Correspond aux membres (« appendices ») qui s’accrochent au squelette axial par l’intermédiaire des ceintures :
+  - **La ceinture scapulaire** : constituée de la clavicule et de la scapula (omoplate), elle ancre le membre supérieur (thoracique : humérus, radius, ulna, carpe, métacarpe, phalanges).
+  - **La ceinture pelvienne** : formée par les os coxaux (bassin) et le sacrum, elle supporte et relie le membre inférieur (pelvien : fémur, patella, tibia, fibula, tarse, métatarse, phalanges).
+
+### 5- Classification des os
+Selon la forme, on distingue plusieurs variétés d’os : plats, courts, longs ou irréguliers. Il existe une autre variété d’os de forme particulière : ce sont les os sésamoïdes (enchâssés dans les tendons, ex: la patella du genou) et les os vomériens (ou wormiens, inconstants, situés entre les os du crâne).
+1. **Os longs** : La longueur est plus importante que la largeur et l’épaisseur. Ils présentent un corps ou diaphyse et deux extrémités ou épiphyses. *Exemple : l'humérus (os du bras) ou le fémur.*
+2. **Os plats** : La longueur et la largeur sont plus importantes que l’épaisseur. *Exemple : la scapula (os de l’épaule) ou le sternum.*
+3. **Os courts** : Les trois dimensions sont à peu près égales. *Exemple : les os du carpe au poignet.*
+4. **Os irréguliers** : De forme inclassable. *Exemple : les vertèbres, l'os maxillaire.*`,
+        },
+        {
+          title: "3. Morphologie superficielle et Structure Histologique et Anatomique de l'Os",
+          content: `### 6- Morphologie osseuse
+La surface des os est irrégulière, elle présente des reliefs caractéristiques :
+1. **La saillie (éminence)** : C'est une élévation à la surface de l’os qui peut être articulaire ou non articulaire.
+   - *Saillie articulaire* : comme la tête ou le condyle.
+   - *Saillie non articulaire* : donnant insertion aux ligaments ou aux muscles (ex: le processus, la tubérosité, le tubercule, l’épine ou la crête).
+2. **La dépression (cavité)** : C'est une cavité creusée dans l’os, articulaire ou non articulaire.
+   - *Dépression articulaire* : forme une articulation (ex: la cavité glénoïde de la scapula).
+   - *Dépression non articulaire* : donne insertion à des muscles ou livre passage à des vaisseaux ou des nerfs (ex: fossette, sillon, etc.).
+3. **Le foramen** : C'est un orifice creusé dans l’os livrant passage à des nerfs ou des vaisseaux sanguins.
+4. **Les incisures** : Ce sont des creux situés sur les bords de l'os.
+
+### 7- Structure de l’os
+#### Le tissu osseux
+C’est un tissu conjonctif spécialisé, rigide et imperméable, en remodelage constant. Il est formé par des cellules osseuses, des fibres (de collagène de type 1) et une substance fondamentale (formée par la matrice organisée et la matrice minéralisée). Les cellules osseuses sont :
+* **Les ostéoblastes** : cellules formatrices du tissu osseux, sécrétant le collagène nécessaire à l'ossification.
+* **Les ostéocytes** : proviennent des ostéoblastes et maintiennent la matrice osseuse, jouant un rôle dans le maintien de l’équilibre phospho-calcique.
+* **Les cellules bordantes** : situées à la surface du tissu osseux.
+* **Les ostéoclastes** : cellules géantes multinucléées qui détruisent l’os (résorption) tandis que les ostéoblastes le reconstruisent.
+
+#### La structure interne
+* **Le périoste** : membrane fibreuse richement vascularisée et innervée qui recouvre toute la surface de l’os (sauf les surfaces articulaires cartilagineuses). Formé d'une couche interne ostéogénique et d'une couche externe fibreuse, il permet l'insertion des muscles et assure la croissance en largeur et la consolidation lors de fractures.
+* **L’os compact (cortical)** : très dense, uniforme et dur, formé d'ostéons (système de Havers, l'unité histo-physiologique de l'os) et de lamelles osseuses. Il représente 80% de la surface de l’os.
+* **L’os spongieux (trabéculaire)** : friable, creusé par des lamelles osseuses. Contenu dans les épiphyses des os longs et forme la couche intermédiaire des os plats (diploé) et courts.
+* **La cavité osseuse** : soit vide et remplie d’air (sinus para-nasaux), soit remplie d'une substance telle que la moelle osseuse jaune dans le canal médullaire de la diaphyse des os longs chez l'adulte. Ces cavités sont recouvertes par une membrane ostéogénique : l’endoste.
+
+#### La structure externe
+* **Os longs** : présentent une diaphyse (corps d'os compact contenant le canal médullaire avec la moelle jaune graisseuse chez l'adulte ou rouge hématopoïétique chez l'enfant), deux épiphyses (extrémités d'os spongieux contenant la moelle rouge, recouvertes de cartilage articulaire) et les métaphyses (segment intermédiaire abritant le cartilage de croissance chez l'enfant).
+* **Os courts** : formés d'une couche d'os spongieux et de moelle au centre, entourée d'une fine couche d'os compact recouverte de périoste.
+* **Os plats** : deux lames d'os compact entourant une lame d'os spongieux.
+* **Os irréguliers** : associent ces différentes structures.`,
+        },
+        {
+          title: "4. Développement, Croissance, Vascularisation et Pathologies Osseuses",
+          content: `### 8- Développement des os (Ostéogenèse)
+Jusqu’à la 6e semaine de gestation, le squelette embryonnaire est membraneux (fibreux) et cartilagineux. L'ostéogenèse remplace progressivement ces structures :
+* **Ossification endochondrale (ou cartilagineuse)** : S'observe dans les os longs et courts. Débute pendant la vie intra-utérine aux points d'ossification primaires puis secondaires dans le cartilage hyalin. Le cartilage est envahi par les vaisseaux et remplacé par du tissu osseux. Une lame de cartilage persiste : le cartilage de conjugaison (croissance). Ces points d'ossification permettent d'évaluer l'âge osseux.
+* **Ossification fibreuse (ou membranaire)** : Débute à la 8e semaine de gestation et s'observe dans les os plats (crâne). Se fait directement dans le tissu conjonctif qui se transforme en cellules osseuses.
+
+### 9- La croissance des os après la naissance
+La croissance osseuse dépend de facteurs génétiques, hormonaux et nutritionnels, et s'arrête entre 25 et 28 ans.
+* La croissance en largeur est assurée par le **périoste**.
+* La croissance en longueur est assurée par le **cartilage de conjugaison** (situé à la jonction épiphyso-diaphysaire).
+* La croissance des os plats se fait au niveau des **sutures osseuses**.
+
+### 10- Vaisseaux et nerfs des os
+* **Os longs** : Artères diaphysaires (pénètrent par le foramen nourricier), artères épiphysaires (forment un cercle péri-articulaire) et artères périostées. Veines satellites ou veine centro-médullaire.
+* **Os plats** : Nombreuses artères pénétrant par les foramens nourriciers. Veines volumineuses traversant l'os spongieux.
+* **Os courts** : Ne possèdent que des artères périostées.
+* **Lymphatiques et Nerfs** : Un réseau lymphatique périosté assure le drainage. Les nerfs accompagnent les artères et sont vasomoteurs et sensitifs.
+
+### 11- Anatomie fonctionnelle
+* Sert de charpente de soutien pour l'organisme et protège les organes vitaux.
+* Permet la mobilité du corps grâce aux articulations agissant comme leviers.
+* Réserve minérale importante de calcium et de phosphore.
+* Hématopoïèse : fabrication quotidienne de 100 à 150 milliards de globules rouges et 1 à 30 milliards de globules blancs au niveau de la moelle rouge.
+
+### 12- Pathologies de l’os
+L'os est un tissu vivant sujet à diverses affections :
+* **Fractures** : traumatismes.
+* **Ostéoporose** : diminution de la masse osseuse (résorption plus rapide que le dépôt).
+* **Ostéomalacie** : déminéralisation de l’os par manque de vitamine D chez l'adulte.
+* **Arthrose** : usure dégénérative du cartilage articulaire.
+* **Cancer de l'os** : tumeurs primitives ou métastases.
+* **Maladie de Paget** : remodelage osseux accéléré et anarchique.`,
+        },
+      ],
+      checkpoints: [
+        {
+          sectionIndex: 0,
+          question: "Quel type de cartilage se trouve préférentiellement au niveau des surfaces articulaires ?",
+          options: [
+            { text: "Le cartilage fibreux", isCorrect: false },
+            { text: "Le cartilage hyalin", isCorrect: true },
+            { text: "Le cartilage élastique", isCorrect: false },
+            { text: "Le fibrocartilage", isCorrect: false }
+          ],
+          explanation: "Le cartilage hyalin est le type de cartilage le plus répandu de l'organisme. Il recouvre notamment les surfaces articulaires pour faciliter le glissement."
+        },
+        {
+          sectionIndex: 1,
+          question: "Combien d'os constituent le squelette axial chez l'adulte ?",
+          options: [
+            { text: "126 os", isCorrect: false },
+            { text: "80 os", isCorrect: true },
+            { text: "206 os", isCorrect: false },
+            { text: "60 os", isCorrect: false }
+          ],
+          explanation: "Le squelette axial comprend 80 os (crâne, colonne vertébrale, cage thoracique), tandis que le squelette appendiculaire en comporte 126, pour un total de 206 os constants chez l'adulte."
+        },
+        {
+          sectionIndex: 2,
+          question: "La patella (rotule) est un exemple de quel type d'os ?",
+          options: [
+            { text: "Os court", isCorrect: false },
+            { text: "Os plat", isCorrect: false },
+            { text: "Os irrégulier", isCorrect: false },
+            { text: "Os sésamoïde", isCorrect: true }
+          ],
+          explanation: "La patella est le plus grand os sésamoïde du corps humain, développé à l'intérieur du tendon du muscle quadriceps fémoral."
+        },
+        {
+          sectionIndex: 3,
+          question: "Quelles cellules sont directement responsables de la résorption (destruction) de la matrice osseuse ?",
+          options: [
+            { text: "Les ostéoblastes", isCorrect: false },
+            { text: "Les ostéocytes", isCorrect: false },
+            { text: "Les ostéoclastes", isCorrect: true },
+            { text: "Les chondrocytes", isCorrect: false }
+          ],
+          explanation: "Les ostéoclastes sont des cellules multinucléées qui dégradent la matrice osseuse lors du remodelage osseux, tandis que les ostéoblastes la construisent."
+        }
+      ]
     };
   }
 

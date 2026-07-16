@@ -61,10 +61,13 @@ export default function RatingButtons({ onRate, visible }: RatingButtonsProps) {
           </div>
 
           <div className="flex flex-col gap-2.5 w-full">
-            {options.map((opt) => (
-              <button
+            {options.map((opt, idx) => (
+              <motion.button
                 key={opt.rating}
                 onClick={() => onRate(opt.rating)}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.15 + idx * 0.08, type: "spring", stiffness: 100, damping: 15 }}
                 className={`w-full flex items-center gap-3.5 rounded-2xl border border-white/5 bg-white/5 py-3 px-4 text-left shadow-sm transition-all duration-200 active:scale-95 cursor-pointer ${opt.hoverClass}`}
               >
                 <span className={`h-2.5 w-2.5 rounded-full ${opt.dotColor} ring-4 shrink-0`} />
@@ -72,7 +75,7 @@ export default function RatingButtons({ onRate, visible }: RatingButtonsProps) {
                   <div className="text-xs font-black text-white leading-none">{opt.label}</div>
                   <span className="text-[9px] font-mono text-teal-light/50 font-bold mt-0.5 block">{opt.time}</span>
                 </div>
-              </button>
+              </motion.button>
             ))}
           </div>
         </motion.div>
