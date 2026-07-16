@@ -228,14 +228,7 @@ export default function Topbar() {
                     <Settings className="h-3.5 w-3.5" />
                     <span>Paramètres</span>
                   </Link>
-                  <Link
-                    href="/statistics"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-text hover:bg-surface/50 hover:text-teal transition-all"
-                  >
-                    <BarChart3 className="h-3.5 w-3.5" />
-                    <span>Statistiques</span>
-                  </Link>
+
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-error hover:bg-error/5 transition-all text-left"
