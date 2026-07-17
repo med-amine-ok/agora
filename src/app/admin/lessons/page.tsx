@@ -18,7 +18,9 @@ import {
   ToggleLeft,
   ToggleRight,
   Globe,
-  Settings
+  Settings,
+  Filter,
+  Search
 } from "lucide-react";
 
 interface Section {
@@ -144,6 +146,11 @@ export default function LessonsPage() {
   const [lessons, setLessons] = useState<Lesson[]>(mockLessons);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+
+  // Filters State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [subjectFilter, setSubjectFilter] = useState("all");
+  const [unitFilter, setUnitFilter] = useState("all");
   
   // Editor Tabs
   const [activeTab, setActiveTab] = useState<"general" | "sections" | "checkpoints" | "anatomy">("general");
@@ -805,70 +812,133 @@ export default function LessonsPage() {
           </div>
         </div>
       ) : (
-        /* Lessons Table Grid */
-        <div className="bg-white border border-[rgba(10,61,61,0.08)] rounded-xl overflow-hidden text-left">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-[#F5FAFA] border-b border-[rgba(10,61,61,0.08)]">
-                  <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Titre de la leçon</th>
-                  <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Matière</th>
-                  <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Chapitre</th>
-                  <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Sections</th>
-                  <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Repères anatomiques</th>
-                  <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Statut</th>
-                  <th className="py-3 px-4 text-right font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lessons.map((less) => (
-                  <tr key={less.id} className="border-b border-[rgba(10,61,61,0.05)] hover:bg-[#F5FAFA] transition-all font-sans group">
-                    <td className="py-3 px-4 font-semibold text-[#0D2626] text-xs">{less.title}</td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded bg-[#E0F2F2] text-[#0E7C7B] text-[10px] font-bold">
-                        {less.subject}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-[#7A9E9E] text-xs font-mono">{less.unit}</td>
-                    <td className="py-3 px-4 text-[#3D5C5C] text-xs font-medium">{less.sections.length} parties</td>
-                    <td className="py-3 px-4">
-                      {less.anatomyConfig ? (
-                        <span className="px-2 py-0.5 rounded border border-[#0E7C7B]/20 text-[#0E7C7B] font-mono text-[9px] font-bold uppercase bg-white">
-                          {less.anatomyConfig.type}
-                        </span>
-                      ) : (
-                        <span className="text-[#7A9E9E]/50 italic text-[11px]">aucun</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                        less.status === "publié" ? "bg-[#0E7C7B]/10 text-[#0E7C7B]" : "bg-[#E8A838]/10 text-[#E8A838]"
-                      }`}>
-                        {less.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex justify-end gap-1.5">
-                        <button 
-                          onClick={() => startEdit(less)}
-                          className="h-7 w-7 rounded-lg border border-[rgba(10,61,61,0.12)] hover:bg-[rgba(10,61,61,0.06)] flex items-center justify-center text-[#0E7C7B] cursor-pointer transition-all"
-                          title="Éditer"
-                        >
-                          <Edit3 className="h-3.5 w-3.5" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(less.id)}
-                          className="h-7 w-7 rounded-lg border border-[rgba(215,38,56,0.15)] hover:bg-[rgba(215,38,56,0.05)] flex items-center justify-center text-[#D72638] cursor-pointer transition-all"
-                          title="Supprimer"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+        /* Lessons Grid List with Filters */
+        <div className="space-y-4">
+          {/* Filters Bar */}
+          <div className="p-4 rounded-xl bg-white border border-[rgba(10,61,61,0.08)] grid grid-cols-1 sm:grid-cols-4 gap-3 shadow-xs font-sans">
+            {/* Search Input */}
+            <div className="relative col-span-1 sm:col-span-2">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#7A9E9E]" />
+              <input
+                type="text"
+                placeholder="Rechercher par titre ou chapitre..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-9 pl-9 pr-3 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] outline-none focus:border-[#0E7C7B] bg-white font-medium"
+              />
+            </div>
+
+            {/* Subject Filter */}
+            <div>
+              <select
+                value={subjectFilter}
+                onChange={(e) => {
+                  setSubjectFilter(e.target.value);
+                  setUnitFilter("all"); // reset unit on subject change
+                }}
+                className="w-full h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] outline-none focus:border-[#0E7C7B] bg-white font-semibold"
+              >
+                <option value="all">Toutes les matières</option>
+                {Array.from(new Set(lessons.map(l => l.subject))).map(subj => (
+                  <option key={subj} value={subj}>{subj}</option>
                 ))}
-              </tbody>
-            </table>
+              </select>
+            </div>
+
+            {/* Unit Filter */}
+            <div>
+              <select
+                value={unitFilter}
+                onChange={(e) => setUnitFilter(e.target.value)}
+                className="w-full h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] outline-none focus:border-[#0E7C7B] bg-white font-semibold"
+              >
+                <option value="all">Tous les chapitres</option>
+                {Array.from(
+                  new Set(
+                    lessons
+                      .filter(l => subjectFilter === "all" || l.subject === subjectFilter)
+                      .map(l => l.unit)
+                  )
+                ).map(un => (
+                  <option key={un} value={un}>{un}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Lessons Table Grid */}
+          <div className="bg-white border border-[rgba(10,61,61,0.08)] rounded-xl overflow-hidden text-left">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-[#F5FAFA] border-b border-[rgba(10,61,61,0.08)]">
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Titre de la leçon</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Matière</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Chapitre</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Sections</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Repères anatomiques</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Statut</th>
+                    <th className="py-3 px-4 text-right font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em] font-sans">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lessons
+                    .filter((l) => {
+                      const matchesSearch = l.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                            l.unit.toLowerCase().includes(searchQuery.toLowerCase());
+                      const matchesSubject = subjectFilter === "all" || l.subject === subjectFilter;
+                      const matchesUnit = unitFilter === "all" || l.unit === unitFilter;
+                      return matchesSearch && matchesSubject && matchesUnit;
+                    })
+                    .map((less) => (
+                      <tr key={less.id} className="border-b border-[rgba(10,61,61,0.05)] hover:bg-[#F5FAFA] transition-all font-sans group">
+                        <td className="py-3 px-4 font-semibold text-[#0D2626] text-xs">{less.title}</td>
+                        <td className="py-3 px-4">
+                          <span className="px-2 py-0.5 rounded bg-[#E0F2F2] text-[#0E7C7B] text-[10px] font-bold">
+                            {less.subject}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-[#7A9E9E] text-xs font-mono">{less.unit}</td>
+                        <td className="py-3 px-4 text-[#3D5C5C] text-xs font-medium">{less.sections.length} parties</td>
+                        <td className="py-3 px-4">
+                          {less.anatomyConfig ? (
+                            <span className="px-2 py-0.5 rounded border border-[#0E7C7B]/20 text-[#0E7C7B] font-mono text-[9px] font-bold uppercase bg-white">
+                              {less.anatomyConfig.type}
+                            </span>
+                          ) : (
+                            <span className="text-[#7A9E9E]/50 italic text-[11px]">aucun</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                            less.status === "publié" ? "bg-[#0E7C7B]/10 text-[#0E7C7B]" : "bg-[#E8A838]/10 text-[#E8A838]"
+                          }`}>
+                            {less.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex justify-end gap-1.5">
+                            <button 
+                              onClick={() => startEdit(less)}
+                              className="h-7 w-7 rounded-lg border border-[rgba(10,61,61,0.12)] hover:bg-[rgba(10,61,61,0.06)] flex items-center justify-center text-[#0E7C7B] cursor-pointer transition-all"
+                              title="Éditer"
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(less.id)}
+                              className="h-7 w-7 rounded-lg border border-[rgba(215,38,56,0.15)] hover:bg-[rgba(215,38,56,0.05)] flex items-center justify-center text-[#D72638] cursor-pointer transition-all"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

@@ -100,6 +100,7 @@ export default function QuestionsPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [diffFilter, setDiffFilter] = useState<string>("all");
   const [subjectFilter, setSubjectFilter] = useState<string>("all");
+  const [lessonFilter, setLessonFilter] = useState<string>("all");
 
   // Form states
   const [editorText, setEditorText] = useState("");
@@ -124,6 +125,13 @@ export default function QuestionsPage() {
     return activeSubject.units.flatMap((u) => u.lessons);
   }, [activeSubject]);
 
+  // Lessons list based on selected subjectFilter
+  const filterSubjectLessons = useMemo(() => {
+    if (subjectFilter === "all") return [];
+    const subj = LESSONS_DATA.find(s => s.id === subjectFilter);
+    return subj ? subj.units.flatMap(u => u.lessons) : [];
+  }, [subjectFilter]);
+
   const filteredQuestions = useMemo(() => {
     return questions.filter((q) => {
       const matchesSearch = q.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -131,9 +139,10 @@ export default function QuestionsPage() {
       const matchesType = typeFilter === "all" || q.type === typeFilter;
       const matchesDiff = diffFilter === "all" || q.difficulty === diffFilter;
       const matchesSubject = subjectFilter === "all" || q.subjectId === subjectFilter;
-      return matchesSearch && matchesType && matchesDiff && matchesSubject;
+      const matchesLesson = lessonFilter === "all" || q.lessonId === lessonFilter;
+      return matchesSearch && matchesType && matchesDiff && matchesSubject && matchesLesson;
     });
-  }, [questions, searchQuery, typeFilter, diffFilter, subjectFilter]);
+  }, [questions, searchQuery, typeFilter, diffFilter, subjectFilter, lessonFilter]);
 
   const startCreate = () => {
     setEditingQuestion(null);
@@ -546,7 +555,10 @@ export default function QuestionsPage() {
               {/* Subject filter */}
               <select
                 value={subjectFilter}
-                onChange={(e) => setSubjectFilter(e.target.value)}
+                onChange={(e) => {
+                  setSubjectFilter(e.target.value);
+                  setLessonFilter("all"); // reset cascading lesson filter
+                }}
                 className="flex-grow sm:flex-grow-0 h-8 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none font-semibold"
               >
                 <option value="all">Toutes matières</option>
@@ -556,6 +568,22 @@ export default function QuestionsPage() {
                   </option>
                 ))}
               </select>
+
+              {/* Lesson filter (cascading) */}
+              {subjectFilter !== "all" && (
+                <select
+                  value={lessonFilter}
+                  onChange={(e) => setLessonFilter(e.target.value)}
+                  className="flex-grow sm:flex-grow-0 h-8 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none font-semibold animate-fade-in"
+                >
+                  <option value="all">Toutes les leçons</option>
+                  {filterSubjectLessons.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.title}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 

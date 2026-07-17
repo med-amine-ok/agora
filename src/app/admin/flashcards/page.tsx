@@ -18,14 +18,32 @@ import {
   CheckCircle,
   FileSpreadsheet,
   Layers,
-  ArrowUpDown
+  ArrowUpDown,
+  Search,
+  Filter,
+  Trash2,
+  Edit2
 } from "lucide-react";
 import { LESSONS_DATA, MOCK_CHAPTERS, MOCK_LESSON_LIST } from "@/app/(student)/lessons/mockLessonsData";
 import { FlashcardType } from "@/types/flashcard";
 
 export default function AdminFlashcardsPage() {
-  const { flashcards, decks, moderateCard, addManualCard } = useFlashcardStore();
-  const [activeTab, setActiveTab] = useState<"moderate" | "create" | "import">("moderate");
+  const { flashcards, decks, moderateCard, addManualCard, deleteCard, updateCard } = useFlashcardStore();
+  const [activeTab, setActiveTab] = useState<"moderate" | "create" | "import" | "manage">("moderate");
+
+  // --- MANAGE TAB STATE ---
+  const [manageSearch, setManageSearch] = useState("");
+  const [manageSubject, setManageSubject] = useState("all");
+  const [manageChapter, setManageChapter] = useState("all");
+  const [manageLesson, setManageLesson] = useState("all");
+  const [manageType, setManageType] = useState("all");
+  const [manageDiff, setManageDiff] = useState("all");
+
+  // Editing overlay mode
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [editingFront, setEditingFront] = useState("");
+  const [editingBack, setEditingBack] = useState("");
+  const [editingDifficulty, setEditingDifficulty] = useState<"easy" | "medium" | "hard">("medium");
 
   // --- MODERATION STATE ---
   const [rejectReason, setRejectReason] = useState<Record<string, string>>({});
@@ -284,6 +302,17 @@ export default function AdminFlashcardsPage() {
           >
             <Upload className="h-3.5 w-3.5" />
             <span>Import en Masse</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("manage")}
+            className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeTab === "manage"
+                ? "bg-[#0E7C7B] text-white shadow-sm"
+                : "text-[#7A9E9E] hover:text-[#0D2626]"
+            }`}
+          >
+            <Layers className="h-3.5 w-3.5" />
+            <span>Toutes les cartes ({flashcards.length})</span>
           </button>
         </div>
       </div>
@@ -816,6 +845,251 @@ export default function AdminFlashcardsPage() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* --- TAB 4: MANAGE & FILTER ALL CARDS --- */}
+      {activeTab === "manage" && (
+        <div className="space-y-4 font-sans">
+          {/* Filtering Header Bar */}
+          <div className="bg-white border border-[rgba(10,61,61,0.08)] rounded-xl p-4 flex flex-col gap-4 shadow-xs">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#7A9E9E]" />
+                <input
+                  type="text"
+                  placeholder="Rechercher recto / verso..."
+                  value={manageSearch}
+                  onChange={(e) => setManageSearch(e.target.value)}
+                  className="w-full h-9 pl-9 pr-3 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] outline-none focus:border-[#0E7C7B] bg-white font-medium"
+                />
+              </div>
+
+              {/* Subject Filter */}
+              <select
+                value={manageSubject}
+                onChange={(e) => {
+                  setManageSubject(e.target.value);
+                  setManageChapter("all");
+                  setManageLesson("all");
+                }}
+                className="h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none font-semibold"
+              >
+                <option value="all">Toutes les matières</option>
+                {LESSONS_DATA.map(sub => (
+                  <option key={sub.id} value={sub.id}>{sub.name}</option>
+                ))}
+              </select>
+
+              {/* Chapter Filter */}
+              <select
+                value={manageChapter}
+                onChange={(e) => {
+                  setManageChapter(e.target.value);
+                  setManageLesson("all");
+                }}
+                disabled={manageSubject === "all"}
+                className="h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none font-semibold disabled:opacity-50"
+              >
+                <option value="all">Tous les chapitres</option>
+                {MOCK_CHAPTERS.filter(c => c.moduleId === manageSubject).map(chap => (
+                  <option key={chap.id} value={chap.id}>{chap.title}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-[rgba(10,61,61,0.05)]">
+              {/* Lesson Filter */}
+              <select
+                value={manageLesson}
+                onChange={(e) => setManageLesson(e.target.value)}
+                disabled={manageChapter === "all"}
+                className="h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none font-semibold disabled:opacity-50"
+              >
+                <option value="all">Toutes les leçons</option>
+                {MOCK_LESSON_LIST.filter(l => l.chapterId === manageChapter).map(les => (
+                  <option key={les.id} value={les.id}>{les.title}</option>
+                ))}
+              </select>
+
+              {/* Type Filter */}
+              <select
+                value={manageType}
+                onChange={(e) => setManageType(e.target.value)}
+                className="h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none font-semibold"
+              >
+                <option value="all">Tous les formats</option>
+                <option value="definition">Définition</option>
+                <option value="true_false">Vrai / Faux</option>
+                <option value="fill_blank">Texte à trou</option>
+                <option value="image_question">Image question</option>
+                <option value="image_label">Identification anatomique</option>
+              </select>
+
+              {/* Difficulty Filter */}
+              <select
+                value={manageDiff}
+                onChange={(e) => setManageDiff(e.target.value)}
+                className="h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none font-semibold"
+              >
+                <option value="all">Toutes difficultés</option>
+                <option value="easy">Facile</option>
+                <option value="medium">Moyen</option>
+                <option value="hard">Difficile</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Cards Grid Table List */}
+          <div className="bg-white border border-[rgba(10,61,61,0.08)] rounded-xl overflow-hidden text-left shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-[#F5FAFA] border-b border-[rgba(10,61,61,0.08)]">
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em]">Recto (Question / Terme)</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em]">Verso (Réponse / Définition)</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em]">Format</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em]">Difficulté</th>
+                    <th className="py-3 px-4 text-left font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em]">Statut</th>
+                    <th className="py-3 px-4 text-right font-bold text-[11px] text-[#7A9E9E] uppercase tracking-[0.04em]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {flashcards
+                    .filter((card) => {
+                      const matchesSearch = card.front.toLowerCase().includes(manageSearch.toLowerCase()) ||
+                                            card.back.toLowerCase().includes(manageSearch.toLowerCase());
+                      const matchesSubject = manageSubject === "all" || card.moduleId === manageSubject;
+                      const matchesChapter = manageChapter === "all" || card.chapterId === manageChapter;
+                      const matchesLesson = manageLesson === "all" || card.lessonId === manageLesson;
+                      const matchesType = manageType === "all" || card.type === manageType;
+                      const matchesDiff = manageDiff === "all" || card.difficulty === manageDiff;
+                      return matchesSearch && matchesSubject && matchesChapter && matchesLesson && matchesType && matchesDiff;
+                    })
+                    .map((card) => (
+                      <tr key={card.id} className="border-b border-[rgba(10,61,61,0.05)] hover:bg-[#F5FAFA] transition-all group">
+                        {editingCardId === card.id ? (
+                          <>
+                            <td className="py-2.5 px-4" colSpan={2}>
+                              <div className="space-y-2">
+                                <input
+                                  type="text"
+                                  value={editingFront}
+                                  onChange={(e) => setEditingFront(e.target.value)}
+                                  className="w-full p-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] font-semibold bg-white outline-none focus:border-[#0E7C7B]"
+                                  placeholder="Texte Recto"
+                                />
+                                <input
+                                  type="text"
+                                  value={editingBack}
+                                  onChange={(e) => setEditingBack(e.target.value)}
+                                  className="w-full p-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none focus:border-[#0E7C7B]"
+                                  placeholder="Texte Verso"
+                                />
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-4">
+                              <span className="rounded-full bg-[#E0F2F2] px-2 py-0.5 text-[9px] font-bold text-[#0E7C7B] uppercase">{card.type}</span>
+                            </td>
+                            <td className="py-2.5 px-4">
+                              <select
+                                value={editingDifficulty}
+                                onChange={(e) => setEditingDifficulty(e.target.value as any)}
+                                className="px-2 py-1 rounded-lg border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] bg-white outline-none"
+                              >
+                                <option value="easy">Facile</option>
+                                <option value="medium">Moyen</option>
+                                <option value="hard">Difficile</option>
+                              </select>
+                            </td>
+                            <td className="py-2.5 px-4">
+                              <span className="text-[11px] text-[#7A9E9E] font-medium uppercase font-mono">{card.status}</span>
+                            </td>
+                            <td className="py-2.5 px-4 text-right">
+                              <div className="flex justify-end gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    updateCard(card.id, {
+                                      front: editingFront,
+                                      back: editingBack,
+                                      difficulty: editingDifficulty
+                                    });
+                                    setEditingCardId(null);
+                                  }}
+                                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-bold cursor-pointer transition-all"
+                                >
+                                  Sauver
+                                </button>
+                                <button
+                                  onClick={() => setEditingCardId(null)}
+                                  className="px-2.5 py-1 border border-[rgba(10,61,61,0.12)] hover:bg-[rgba(10,61,61,0.06)] rounded text-[10px] font-bold text-[#3D5C5C] cursor-pointer transition-all"
+                                >
+                                  Annuler
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="py-3 px-4 font-semibold text-[#0D2626] text-xs max-w-xs truncate">{card.front}</td>
+                            <td className="py-3 px-4 text-xs text-[#3D5C5C] max-w-xs truncate">{card.back}</td>
+                            <td className="py-3 px-4">
+                              <span className="rounded-full bg-[#E0F2F2] px-2 py-0.5 text-[9px] font-bold text-[#0E7C7B] uppercase">{card.type}</span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                card.difficulty === "easy" 
+                                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                                  : card.difficulty === "hard" 
+                                    ? "bg-rose-50 text-rose-600 border border-rose-100" 
+                                    : "bg-amber-50 text-amber-600 border border-amber-100"
+                              }`}>
+                                {card.difficulty}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                card.status === "approved" 
+                                  ? "bg-emerald-100/70 text-emerald-700" 
+                                  : card.status === "rejected"
+                                    ? "bg-rose-100/70 text-rose-700"
+                                    : "bg-amber-100/70 text-amber-700"
+                              }`}>
+                                {card.status === "approved" ? "Publié" : card.status === "rejected" ? "Refusé" : "En cours"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <div className="flex justify-end gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    setEditingCardId(card.id);
+                                    setEditingFront(card.front);
+                                    setEditingBack(card.back);
+                                    setEditingDifficulty(card.difficulty || "medium");
+                                  }}
+                                  className="h-7 w-7 rounded-lg border border-[rgba(10,61,61,0.12)] hover:bg-[rgba(10,61,61,0.06)] flex items-center justify-center text-[#0E7C7B] cursor-pointer transition-all"
+                                  title="Éditer"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => deleteCard(card.id)}
+                                  className="h-7 w-7 rounded-lg border border-[rgba(215,38,56,0.15)] hover:bg-[rgba(215,38,56,0.05)] flex items-center justify-center text-[#D72638] cursor-pointer transition-all"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
     </div>
