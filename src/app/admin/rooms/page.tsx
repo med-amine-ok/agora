@@ -10,7 +10,8 @@ import {
   MessageSquare,
   Activity,
   User,
-  Radio
+  Radio,
+  Tv
 } from "lucide-react";
 
 interface GameRoom {
@@ -40,71 +41,72 @@ export default function RoomsMonitoringPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 text-left">
       {/* Header banner */}
-      <div className="border-b border-teal/10 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="flex items-start justify-between border-b border-[rgba(10,61,61,0.08)] pb-5">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-text-dark flex items-center gap-2">
-            <Radio className="h-6 w-6 text-accent animate-pulse" /> Surveillance des Salons Multi-joueurs
+          <h1 className="font-display text-[24px] font-semibold text-[#0D2626] flex items-center gap-2">
+            <Radio className="h-6 w-6 text-[#FF6B35] animate-pulse" /> Surveillance des Salons Multi-joueurs
           </h1>
-          <p className="text-xs text-text-light mt-1 uppercase font-mono tracking-wider">
-            Supervisez les duels en direct, inspectez le chat et fermez les salons inactifs.
+          <p className="text-[13px] text-[#7A9E9E] mt-1 font-sans">
+            Supervisez les duels cliniques en direct, inspectez le chat des salons et fermez les rooms inactives.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-teal animate-ping" />
-          <span className="text-[10px] font-mono font-bold text-teal uppercase">Mise à jour en temps réel</span>
+        <div className="flex items-center gap-2 bg-[#E0F2F2] px-3 py-1.5 rounded-lg border border-[#0E7C7B]/10 font-sans">
+          <span className="h-2 w-2 rounded-full bg-[#0E7C7B] animate-ping" />
+          <span className="text-[10px] font-bold text-[#0E7C7B] uppercase tracking-wider">Live stream</span>
         </div>
       </div>
 
       {/* Main Grid: Rooms List and Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-sans">
         {/* Rooms List */}
-        <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-text-dark flex items-center gap-1.5 border-b border-teal/5 pb-2">
-            <Users className="h-4 w-4 text-teal" /> SALONS ACTIFS
+        <div className="lg:col-span-2 space-y-4 text-left">
+          <h3 className="text-[10px] uppercase tracking-wider font-bold text-[#7A9E9E] flex items-center gap-1.5 border-b border-[rgba(10,61,61,0.08)] pb-2">
+            <Users className="h-4 w-4 text-[#0E7C7B]" /> SALONS ACTIFS ({rooms.length})
           </h3>
 
           <div className="space-y-3">
             {rooms.map((room) => (
               <div 
                 key={room.id}
-                className="p-4 rounded-xl border border-teal/10 bg-white-custom shadow-sm hover:border-teal/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="p-4 rounded-xl border border-[rgba(10,61,61,0.08)] bg-white shadow-xs hover:border-[rgba(10,61,61,0.15)] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-accent">#{room.id}</span>
-                    <h4 className="text-sm font-bold text-text-dark">{room.name}</h4>
+                    <span className="text-[11px] font-mono font-bold text-[#FF6B35]">#{room.id}</span>
+                    <h4 className="text-xs font-bold text-[#0D2626]">{room.name}</h4>
                   </div>
-                  <div className="flex items-center gap-4 text-[10px] text-text-light">
+                  <div className="flex items-center gap-4 text-[10px] text-[#7A9E9E]">
                     <span className="flex items-center gap-1">
-                      <User className="h-3 w-3 text-teal" /> Créateur: {room.creator}
+                      <User className="h-3.5 w-3.5 text-[#0E7C7B]" /> Créateur: {room.creator}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Users className="h-3 w-3 text-teal" /> {room.players.length} joueurs connectés
+                      <Users className="h-3.5 w-3.5 text-[#0E7C7B]" /> {room.players.length} joueurs connectés
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-center">
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                    room.status === "En cours" ? "bg-teal/10 text-teal animate-pulse" : "bg-accent/10 text-accent"
+                    room.status === "En cours" ? "bg-[#0E7C7B]/10 text-[#0E7C7B] animate-pulse" : "bg-[#FF6B35]/10 text-[#FF6B35]"
                   }`}>
                     {room.status}
                   </span>
 
                   <button
                     onClick={() => setInspectingRoom(room)}
-                    className="p-1.5 rounded border border-teal/10 text-teal hover:bg-teal/5"
+                    className="h-8 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] text-[#0E7C7B] hover:bg-[#F5FAFA] flex items-center justify-center cursor-pointer"
                     title="Inspecter le salon"
                   >
-                    <Eye className="h-3.5 w-3.5" />
+                    <Eye className="h-3.5 w-3.5 mr-1" />
+                    <span className="text-[10px] font-bold">Inspecter</span>
                   </button>
 
                   <button
                     onClick={() => handleCloseRoom(room.id)}
-                    className="p-1.5 rounded border border-error/10 text-error hover:bg-error/5"
+                    className="h-8 w-8 rounded-lg border border-[rgba(215,38,56,0.15)] text-[#D72638] hover:bg-red-50 flex items-center justify-center cursor-pointer"
                     title="Fermer le salon"
                   >
                     <XOctagon className="h-3.5 w-3.5" />
@@ -112,61 +114,78 @@ export default function RoomsMonitoringPage() {
                 </div>
               </div>
             ))}
+
+            {rooms.length === 0 && (
+              <div className="rounded-xl border border-dashed border-[rgba(10,61,61,0.15)] p-12 text-center space-y-3 bg-white">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#E0F2F2] text-[#0E7C7B]">
+                  <Tv className="h-6 w-6" />
+                </div>
+                <h3 className="font-display text-sm font-bold text-[#0D2626]">Aucun salon actif</h3>
+                <p className="text-[12px] text-[#7A9E9E] max-w-sm mx-auto">
+                  Il n'y a actuellement aucun salon multi-joueurs en attente ou en cours.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Room Inspector Panel */}
-        <div className="p-6 rounded-2xl border border-teal/10 bg-white-custom shadow-sm space-y-6">
-          <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-text-dark flex items-center gap-1.5 border-b border-teal/5 pb-2">
-            <ShieldAlert className="h-4 w-4 text-accent" /> INSPECTEUR DE SALON
+        <div className="p-5 rounded-xl border border-[rgba(10,61,61,0.08)] bg-white shadow-xs space-y-5 text-left h-fit">
+          <h3 className="text-[10px] uppercase tracking-wider font-bold text-[#7A9E9E] flex items-center gap-1.5 border-b border-[rgba(10,61,61,0.08)] pb-2">
+            <ShieldAlert className="h-4 w-4 text-[#FF6B35]" /> INSPECTEUR DE SALON
           </h3>
 
           {inspectingRoom ? (
             <div className="space-y-4">
               <div>
-                <span className="text-[10px] font-mono text-text-light uppercase block">Identifiant</span>
-                <span className="text-sm font-bold text-text-dark font-mono block">#{inspectingRoom.id}</span>
+                <span className="text-[9px] font-bold text-[#7A9E9E] uppercase tracking-wider block">Identifiant</span>
+                <span className="text-xs font-bold text-[#0D2626] font-mono block mt-0.5">#{inspectingRoom.id}</span>
               </div>
 
               <div>
-                <span className="text-[10px] font-mono text-text-light uppercase block">Joueurs du Salon</span>
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <span className="text-[9px] font-bold text-[#7A9E9E] uppercase tracking-wider block">Nom du salon</span>
+                <span className="text-xs font-bold text-[#0D2626] block mt-0.5">{inspectingRoom.name}</span>
+              </div>
+
+              <div>
+                <span className="text-[9px] font-bold text-[#7A9E9E] uppercase tracking-wider block">Membres du salon</span>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {inspectingRoom.players.map((p, i) => (
-                    <span key={i} className="px-2 py-0.5 rounded-lg bg-surface/50 border border-teal/5 text-[10px] font-semibold text-text-main">
+                    <span key={i} className="px-2 py-0.5 rounded bg-[#E0F2F2] border border-[#0E7C7B]/10 text-[10px] font-bold text-[#0E7C7B]">
                       {p}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <span className="text-[10px] font-mono text-text-light uppercase flex items-center gap-1">
-                  <MessageSquare className="h-3.5 w-3.5 text-teal" /> Flux du chat de la room
+              <div className="space-y-2 pt-2 border-t border-[rgba(10,61,61,0.05)]">
+                <span className="text-[9px] font-bold text-[#7A9E9E] uppercase tracking-wider flex items-center gap-1">
+                  <MessageSquare className="h-3.5 w-3.5 text-[#0E7C7B]" /> Flux du chat de la room
                 </span>
-                <div className="p-3 rounded-lg bg-surface/30 border border-teal/5 space-y-2 h-48 overflow-y-auto font-mono text-[10px] text-text-main">
+                <div className="p-3 rounded-lg bg-[#F5FAFA] border border-[rgba(10,61,61,0.05)] space-y-2 h-44 overflow-y-auto font-mono text-[10px] text-[#3D5C5C]">
                   {inspectingRoom.messages.length > 0 ? (
                     inspectingRoom.messages.map((m, i) => (
-                      <p key={i}>
-                        <span className="font-bold text-teal">{m.sender} :</span> {m.text}
+                      <p key={i} className="leading-relaxed">
+                        <strong className="text-[#0E7C7B]">{m.sender} :</strong> {m.text}
                       </p>
                     ))
                   ) : (
-                    <p className="text-text-light/50 italic text-center py-4">Aucun message échangé</p>
+                    <p className="text-[#7A9E9E] italic text-center pt-8">Aucun message échangé.</p>
                   )}
                 </div>
               </div>
 
               <button
                 onClick={() => handleCloseRoom(inspectingRoom.id)}
-                className="w-full py-2 rounded-xl bg-error text-white-custom hover:bg-error/90 text-xs font-bold transition-all"
+                className="w-full py-2 bg-[#D72638] text-white hover:bg-[#D72638]/90 font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-[10px] uppercase tracking-wider shadow-xs mt-2"
               >
-                Fermer le Salon par Force
+                <XOctagon className="h-4 w-4" /> Forcer la fermeture du salon
               </button>
             </div>
           ) : (
-            <p className="text-xs text-text-light/60 italic text-center py-12">
-              Sélectionnez un salon à inspecter pour analyser les conversations et les joueurs connectés.
-            </p>
+            <div className="py-12 text-center text-[#7A9E9E] italic text-xs">
+              Sélectionnez un salon à inspecter pour surveiller ses logs et son chat.
+            </div>
           )}
         </div>
       </div>

@@ -4,254 +4,420 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAgoraStore } from "@/store/useAgoraStore";
-import { motion, AnimatePresence } from "framer-motion";
 import {
-  Activity,
-  BarChart2,
-  Users,
+  LayoutDashboard,
   BookOpen,
   HelpCircle,
-  Trophy,
-  AlertTriangle,
+  Layers,
   FileText,
+  Users,
+  Shield,
+  Trophy,
+  BarChart2,
+  Activity,
   Settings,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  User,
-  ShieldCheck,
-  Search,
+  Bell,
   ExternalLink,
+  LogOut,
+  Search,
+  Monitor,
+  User,
   Menu,
-  X
+  ChevronDown
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAgoraStore();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const adminLinks = [
-    { name: "Vue d'ensemble", href: "/admin", icon: <Activity className="h-4 w-4" /> },
-    { name: "Analyses", href: "/admin/analytics", icon: <BarChart2 className="h-4 w-4" /> },
-    { name: "Étudiants", href: "/admin/users", icon: <Users className="h-4 w-4" /> },
-    { name: "Matières", href: "/admin/subjects", icon: <BookOpen className="h-4 w-4" /> },
-    { name: "Leçons", href: "/admin/lessons", icon: <FileText className="h-4 w-4" /> },
-    { name: "Questions QCM", href: "/admin/questions", icon: <HelpCircle className="h-4 w-4" /> },
-    { name: "Flashcards", href: "/admin/flashcards", icon: <ShieldCheck className="h-4 w-4" /> },
-    { name: "Salons Blitz", href: "/admin/rooms", icon: <Activity className="h-4 w-4" /> },
-    { name: "Classements", href: "/admin/leaderboard", icon: <Trophy className="h-4 w-4" /> },
-    { name: "Signalements", href: "/admin/reports", icon: <AlertTriangle className="h-4 w-4" /> },
-    { name: "Articles CMS", href: "/admin/blog", icon: <FileText className="h-4 w-4" /> },
-    { name: "Configuration", href: "/admin/settings", icon: <Settings className="h-4 w-4" /> },
-  ];
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [showAvatarMenu, setShowAvatarMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleLogout = () => {
     logout();
     router.push("/");
   };
 
-  const isActive = (href: string) => {
-    if (href === "/admin") {
-      return pathname === "/admin";
+  const navSections = [
+    {
+      title: "Tableau de Bord",
+      items: [
+        { name: "Vue d'ensemble", href: "/admin", icon: <LayoutDashboard className="h-4 w-4" /> }
+      ]
+    },
+    {
+      title: "Contenu",
+      items: [
+        { name: "Sujets", href: "/admin/subjects", icon: <BookOpen className="h-4 w-4" /> },
+        { name: "Leçons", href: "/admin/lessons", icon: <BookOpen className="h-4 w-4" /> },
+        { name: "Questions", href: "/admin/questions", icon: <HelpCircle className="h-4 w-4" /> },
+        { name: "Flashcards", href: "/admin/flashcards", icon: <Layers className="h-4 w-4" />, badge: 12 },
+        { name: "Blog", href: "/admin/blog", icon: <FileText className="h-4 w-4" /> }
+      ]
+    },
+    {
+      title: "Utilisateurs",
+      items: [
+        { name: "Tous les utilisateurs", href: "/admin/users", icon: <Users className="h-4 w-4" /> },
+        { name: "Rôles & permissions", href: "/admin/roles", icon: <Shield className="h-4 w-4" /> }
+      ]
+    },
+    {
+      title: "Activité",
+      items: [
+        { name: "Salles en direct", href: "/admin/rooms", icon: <Trophy className="h-4 w-4" />, badge: 14 },
+        { name: "Statistiques", href: "/admin/analytics", icon: <BarChart2 className="h-4 w-4" /> },
+        { name: "Logs d'activité", href: "/admin/reports", icon: <Activity className="h-4 w-4" /> }
+      ]
+    },
+    {
+      title: "Configuration",
+      items: [
+        { name: "Paramètres", href: "/admin/settings", icon: <Settings className="h-4 w-4" /> },
+        { name: "Notifications", href: "/admin/notifications", icon: <Bell className="h-4 w-4" /> }
+      ]
     }
-    return pathname.startsWith(href);
+  ];
+
+  const getPageTitleAndBreadcrumb = () => {
+    if (pathname === "/admin") return { title: "Vue d'ensemble", path: "Tableau de bord / Vue d'ensemble" };
+    if (pathname.startsWith("/admin/lessons")) return { title: "Leçons", path: "Contenu / Leçons" };
+    if (pathname.startsWith("/admin/questions")) return { title: "Questions", path: "Contenu / Questions" };
+    if (pathname.startsWith("/admin/flashcards")) return { title: "Flashcards", path: "Contenu / Flashcards" };
+    if (pathname.startsWith("/admin/blog")) return { title: "Blog", path: "Contenu / Blog" };
+    if (pathname.startsWith("/admin/users")) return { title: "Utilisateurs", path: "Utilisateurs / Tous les utilisateurs" };
+    if (pathname.startsWith("/admin/rooms")) return { title: "Salles en direct", path: "Activité / Salles en direct" };
+    if (pathname.startsWith("/admin/analytics")) return { title: "Statistiques", path: "Activité / Statistiques" };
+    if (pathname.startsWith("/admin/settings")) return { title: "Paramètres", path: "Configuration / Paramètres" };
+    return { title: "Console Admin", path: "Agora / Admin" };
   };
 
+  const { title, path } = getPageTitleAndBreadcrumb();
+
   return (
-    <div className="min-h-screen flex bg-[#f8fbfb] text-text-dark">
-      
-      {/* Desktop Left Sidebar (Hidden on mobile) */}
-      <aside
-        className={`hidden lg:flex bg-surface/40 border-r border-border-custom flex-col justify-between transition-all duration-300 shrink-0 ${
-          isCollapsed ? "w-16" : "w-64"
-        }`}
-      >
-        <div>
-          {/* Header logo */}
-          <div className="h-16 flex items-center justify-between px-4 border-b border-border-custom">
-            <div className="flex items-center gap-2">
-              <img src="/agoraLogo.png" alt="Agora Logo" className="h-12 w-12 object-contain shrink-0" />
-              {!isCollapsed && (
-                <span className="font-display font-bold text-sm tracking-widest text-teal-dark uppercase">
-                  ADMIN
-                </span>
-              )}
-            </div>
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="text-text-light hover:text-teal rounded p-1 hover:bg-surface cursor-pointer"
-            >
-              {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </button>
-          </div>
-
-          {/* Nav links */}
-          <nav className="mt-4 px-2 space-y-1">
-            {adminLinks.map((link) => {
-              const active = isActive(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold transition-all ${
-                    active
-                      ? "bg-teal/10 text-teal border-l-2 border-accent"
-                      : "text-text-light hover:text-teal hover:bg-surface/50"
-                  }`}
-                >
-                  {link.icon}
-                  {!isCollapsed && <span>{link.name}</span>}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Footer actions */}
-        <div className="p-2 border-t border-border-custom space-y-1">
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold text-text-light hover:text-teal hover:bg-surface/50 transition-all"
-          >
-            <ExternalLink className="h-4 w-4" />
-            {!isCollapsed && <span>Retour au site</span>}
-          </Link>
+    <div className="min-h-screen bg-[#F5FAFA]">
+      {/* Mobile Header / Topbar */}
+      <header className="h-[52px] bg-white border-b border-[rgba(10,61,61,0.08)] fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 lg:hidden">
+        <div className="flex items-center gap-3">
           <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold text-error hover:bg-error/10 transition-all text-left cursor-pointer"
+            onClick={() => setShowMobileMenu(true)}
+            className="p-1 rounded-lg hover:bg-[rgba(10,61,61,0.06)] text-[#0D2626]"
           >
-            <LogOut className="h-4 w-4" />
-            {!isCollapsed && <span>Se déconnecter</span>}
+            <Menu className="h-6 w-6" />
           </button>
+          <div className="flex items-center gap-1.5">
+            <img src="/icon.png" alt="Agora Logo" className="h-6 w-6 object-contain" />
+            <span className="font-display font-semibold tracking-wider text-xs text-[#0D2626]">
+              Agora <span className="text-[#0E7C7B] font-sans text-[10px] font-bold">Admin</span>
+            </span>
+          </div>
         </div>
-      </aside>
 
-      {/* Mobile Drawer Overlay */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 z-40 bg-black lg:hidden"
-            />
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-50 w-72 bg-white-custom border-r border-border-custom flex flex-col justify-between shadow-2xl lg:hidden"
+        <div className="flex items-center gap-2">
+          {/* Notification bell */}
+          <button className="p-1.5 hover:bg-[rgba(10,61,61,0.06)] rounded-lg text-[#3D5C5C] relative">
+            <Bell className="h-4 w-4" />
+            <span className="absolute top-1 right-1 h-1.5 w-1.5 bg-[#FF6B35] rounded-full" />
+          </button>
+
+          {/* Mini User dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowAvatarMenu(!showAvatarMenu)}
+              className="h-7 w-7 rounded-full bg-[#E0F2F2] flex items-center justify-center font-bold text-[11px] text-[#0E7C7B]"
             >
-              <div>
-                <div className="h-16 flex items-center justify-between px-4 border-b border-border-custom">
-                  <div className="flex items-center gap-2">
-                    <img src="/agoraLogo.png" alt="Agora Logo" className="h-12 w-12 object-contain" />
-                    <span className="font-display font-bold text-sm tracking-widest text-teal-dark uppercase">
+              {user?.name?.slice(0, 2).toUpperCase() || "HB"}
+            </button>
+            {showAvatarMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowAvatarMenu(false)} />
+                <div className="absolute right-0 mt-1.5 w-48 bg-white border border-[rgba(10,61,61,0.12)] rounded-lg shadow-lg py-1 z-50">
+                  <div className="px-3 py-2 border-b border-[rgba(10,61,61,0.06)]">
+                    <p className="text-xs font-bold text-[#0D2626]">{user?.name || "Hamza Belkadi"}</p>
+                    <span className="inline-block mt-1 px-1.5 py-0.5 bg-red-50 text-[9px] font-bold text-red-600 rounded">
                       ADMIN
                     </span>
                   </div>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-1.5 rounded-full hover:bg-surface text-text-light"
+                  <Link
+                    href="/admin/settings"
+                    onClick={() => setShowAvatarMenu(false)}
+                    className="block w-full text-left px-3 py-1.5 text-xs text-[#0D2626] hover:bg-[#F5FAFA]"
                   >
-                    <X className="h-5 w-5" />
+                    Mon profil
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setShowAvatarMenu(false);
+                      handleLogout();
+                    }}
+                    className="block w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 cursor-pointer"
+                  >
+                    Déconnexion
                   </button>
                 </div>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
 
-                <nav className="mt-4 px-2 space-y-1">
-                  {adminLinks.map((link) => {
-                    const active = isActive(link.href);
+      {/* Mobile Drawer Navigation Backdrop */}
+      {showMobileMenu && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 lg:hidden transition-opacity"
+          onClick={() => setShowMobileMenu(false)}
+        />
+      )}
+
+      {/* Mobile Drawer Navigation Panel */}
+      <aside
+        className={`fixed top-0 bottom-0 left-0 w-[240px] bg-[#071F1F] text-white z-50 flex flex-col justify-between overflow-y-auto transition-transform duration-300 lg:hidden ${
+          showMobileMenu ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div>
+          {/* Logo Area */}
+          <div className="h-[52px] flex items-center justify-between px-5 border-b border-white/5">
+            <div className="flex items-center gap-2.5">
+              <img src="/icon.png" alt="Agora Logo" className="h-7 w-7 object-contain" />
+              <span className="font-display font-semibold tracking-wider text-sm text-white">
+                Agora <span className="text-[#5DC8C6] font-sans text-xs font-bold ml-1 uppercase">Admin</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation Sections */}
+          <div className="mt-4 px-2 space-y-4">
+            {navSections.map((section, idx) => (
+              <div key={idx}>
+                <h4 className="text-[10px] font-bold text-[rgba(93,200,198,0.45)] uppercase tracking-[0.08em] px-3 mb-1.5">
+                  {section.title}
+                </h4>
+                <nav className="space-y-0.5">
+                  {section.items.map((item) => {
+                    const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
                     return (
                       <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold transition-all ${
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setShowMobileMenu(false)}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all ${
                           active
-                            ? "bg-teal/10 text-teal border-l-2 border-accent"
-                            : "text-text-light hover:text-teal hover:bg-surface/50"
+                            ? "bg-[rgba(14,124,123,0.18)] text-[rgba(245,250,250,0.95)]"
+                            : "text-[rgba(245,250,250,0.60)] hover:bg-white/5 hover:text-[rgba(245,250,250,0.85)]"
                         }`}
                       >
-                        {link.icon}
-                        <span>{link.name}</span>
+                        <span className={active ? "text-[#5DC8C6]" : "text-current"}>
+                          {item.icon}
+                        </span>
+                        <span>{item.name}</span>
+                        {item.badge !== undefined && (
+                          <span className="ml-auto bg-[#FF6B35] text-white rounded-full text-[11px] font-semibold px-1.5 py-0.5 min-w-[18px] text-center">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}
                 </nav>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <div className="p-4 border-t border-border-custom space-y-1">
-                <Link
-                  href="/"
-                  className="flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold text-text-light hover:text-teal hover:bg-surface/50 transition-all"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span>Retour au site</span>
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-semibold text-error hover:bg-error/10 transition-all text-left cursor-pointer"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Se déconnecter</span>
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        {/* Sidebar Footer */}
+        <div className="p-3 border-t border-white/5 space-y-1">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex items-center justify-between px-3 py-2 rounded-lg border border-[rgba(93,200,198,0.15)] text-[12px] text-[rgba(245,250,250,0.50)]"
+          >
+            <span>Voir le site étudiant</span>
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-red-400 hover:bg-red-500/10 transition-all text-left cursor-pointer"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      </aside>
 
-      {/* Right Content Area */}
-      <div className="flex-grow flex flex-col min-w-0">
-        
-        {/* Top toolbar */}
-        <header className="h-16 border-b border-border-custom bg-white-custom flex items-center justify-between px-4 sm:px-6">
-          
-          {/* Mobile menu trigger + search bar container */}
-          <div className="flex items-center gap-2 flex-grow max-w-sm sm:max-w-md">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-text-light hover:text-teal rounded hover:bg-surface shrink-0 cursor-pointer"
+      <div className="flex min-h-screen">
+        {/* Desktop Sidebar (hidden on mobile) */}
+        <aside className="hidden lg:flex w-[240px] bg-[#071F1F] text-white fixed top-0 bottom-0 left-0 flex flex-col justify-between z-50 overflow-y-auto">
+          <div>
+            {/* Logo Area */}
+            <div className="h-[52px] flex items-center gap-2.5 px-5 border-b border-white/5">
+              <img src="/icon.png" alt="Agora Logo" className="h-7 w-7 object-contain" />
+              <span className="font-display font-semibold tracking-wider text-sm text-white">
+                Agora <span className="text-[#5DC8C6] font-sans text-xs font-bold ml-1 uppercase">Admin</span>
+              </span>
+            </div>
+
+            {/* Navigation Sections */}
+            <div className="mt-4 px-2 space-y-4">
+              {navSections.map((section, idx) => (
+                <div key={idx}>
+                  <h4 className="text-[10px] font-bold text-[rgba(93,200,198,0.45)] uppercase tracking-[0.08em] px-3 mb-1.5">
+                    {section.title}
+                  </h4>
+                  <nav className="space-y-0.5">
+                    {section.items.map((item) => {
+                      const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all font-sans ${
+                            active
+                              ? "bg-[rgba(14,124,123,0.18)] text-[rgba(245,250,250,0.95)]"
+                              : "text-[rgba(245,250,250,0.60)] hover:bg-white/5 hover:text-[rgba(245,250,250,0.85)]"
+                          }`}
+                        >
+                          <span className={active ? "text-[#5DC8C6]" : "text-current"}>
+                            {item.icon}
+                          </span>
+                          <span>{item.name}</span>
+                          {item.badge !== undefined && (
+                            <span className="ml-auto bg-[#FF6B35] text-white rounded-full text-[11px] font-semibold px-1.5 py-0.5 min-w-[18px] text-center">
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Sidebar Footer */}
+          <div className="p-3 border-t border-white/5 space-y-1">
+            <Link
+              href="/"
+              target="_blank"
+              className="flex items-center justify-between px-3 py-2 rounded-lg border border-[rgba(93,200,198,0.15)] text-[12px] text-[rgba(245,250,250,0.50)] hover:border-[rgba(93,200,198,0.35)] hover:text-[rgba(245,250,250,0.80)] transition-all font-sans"
             >
-              <Menu className="h-5 w-5" />
+              <span>Voir le site étudiant</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-red-400 hover:bg-red-500/10 transition-all text-left cursor-pointer font-sans"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Déconnexion</span>
             </button>
-
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Rechercher..."
-                className="w-full pl-8 pr-3 py-1.5 rounded bg-surface/30 border border-border-custom text-xs outline-none focus:border-teal text-text-dark placeholder-text-light/40"
-              />
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-text-light/50" />
-            </div>
           </div>
+        </aside>
 
-          {/* Admin User Badge */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 pl-3 border-l border-border-custom">
-              <div className="flex h-8 w-8 items-center justify-center rounded bg-surface text-text-dark shrink-0">
-                <ShieldCheck className="h-4.5 w-4.5 text-teal" />
+        {/* Main Content Area */}
+        <div className="flex-grow w-full lg:pl-[240px]">
+          {/* Topbar (hidden on mobile, uses Mobile Header instead) */}
+          <header className="hidden lg:flex h-[52px] bg-white border-b border-[rgba(10,61,61,0.08)] fixed top-0 left-[240px] right-0 z-40 items-center justify-between px-6">
+            {/* Left: Breadcrumbs */}
+            <div className="flex flex-col text-left">
+              <span className="text-[10px] text-[#7A9E9E] font-medium tracking-wide font-sans">
+                {path}
+              </span>
+              <span className="text-sm font-semibold text-[#0D2626] leading-tight font-sans">
+                {title}
+              </span>
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-4">
+              {/* Global search */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Recherche globale..."
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  className={`h-8 pl-9 pr-3 rounded-lg bg-[rgba(10,61,61,0.06)] border border-[rgba(10,61,61,0.12)] text-xs text-[#0D2626] outline-none focus:bg-white focus:border-[#0E7C7B] focus:ring-2 focus:ring-[#0E7C7B]/15 placeholder-[#7A9E9E]/70 font-sans transition-all duration-250 ${
+                    searchFocused ? "w-[360px]" : "w-[260px]"
+                  }`}
+                />
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#7A9E9E]" />
               </div>
-              <div className="text-left hidden sm:block">
-                <p className="text-xs font-bold leading-none text-text-dark">{user?.name || "Dr. Belkacem"}</p>
-                <p className="text-[9px] uppercase font-mono tracking-wider text-accent leading-none mt-1">
-                  Administrateur
-                </p>
+
+              {/* Notification bell */}
+              <button className="p-1.5 hover:bg-[rgba(10,61,61,0.06)] rounded-lg text-[#3D5C5C] relative cursor-pointer">
+                <Bell className="h-4 w-4" />
+                <span className="absolute top-1 right-1 h-1.5 w-1.5 bg-[#FF6B35] rounded-full" />
+              </button>
+
+              {/* User dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowAvatarMenu(!showAvatarMenu)}
+                  className="flex items-center gap-2 pl-3 border-l border-[rgba(10,61,61,0.08)] cursor-pointer"
+                >
+                  <div className="h-7 w-7 rounded-full bg-[#E0F2F2] flex items-center justify-center font-bold text-[11px] text-[#0E7C7B]">
+                    {user?.name?.slice(0, 2).toUpperCase() || "HB"}
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-[#0D2626] leading-none">{user?.name || "Hamza Belkadi"}</p>
+                    <p className="text-[9px] uppercase font-mono tracking-wider text-[#FF6B35] leading-none mt-0.5">
+                      ADMIN
+                    </p>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-[#7A9E9E]" />
+                </button>
+
+                {showAvatarMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowAvatarMenu(false)} />
+                    <div className="absolute right-0 mt-1.5 w-48 bg-white border border-[rgba(10,61,61,0.12)] rounded-lg shadow-lg py-1 z-50">
+                      <div className="px-3 py-2 border-b border-[rgba(10,61,61,0.06)]">
+                        <p className="text-xs font-bold text-[#0D2626]">{user?.name || "Hamza Belkadi"}</p>
+                        <span className="inline-block mt-1 px-1.5 py-0.5 bg-red-50 text-[9px] font-bold text-red-600 rounded">
+                          ADMIN
+                    </span>
+                      </div>
+                      <Link
+                        href="/admin/settings"
+                        onClick={() => setShowAvatarMenu(false)}
+                        className="block w-full text-left px-3 py-1.5 text-xs text-[#0D2626] hover:bg-[#F5FAFA] font-sans"
+                      >
+                        Mon profil
+                      </Link>
+                      <Link
+                        href="/"
+                        target="_blank"
+                        className="block w-full text-left px-3 py-1.5 text-xs text-[#0D2626] hover:bg-[#F5FAFA] font-sans"
+                      >
+                        Voir le site étudiant
+                      </Link>
+                      <div className="h-[1px] bg-[rgba(10,61,61,0.06)] my-1" />
+                      <button
+                        onClick={() => {
+                          setShowAvatarMenu(false);
+                          handleLogout();
+                        }}
+                        className="block w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 font-sans cursor-pointer"
+                      >
+                        Déconnexion
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-          </div>
+          </header>
 
-        </header>
-
-        {/* Content body */}
-        <main className="flex-grow p-4 sm:p-6 overflow-y-auto bg-white-custom">
-          {children}
-        </main>
+          {/* Main content body */}
+          <main className="pt-[52px] lg:pt-[52px] bg-[#F5FAFA] min-h-screen w-full">
+            <div className="p-4 sm:p-6 lg:p-7 max-w-[1280px] mx-auto">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );

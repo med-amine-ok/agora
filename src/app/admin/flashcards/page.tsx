@@ -89,7 +89,6 @@ export default function AdminFlashcardsPage() {
   const handleCreateCardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Map deckId. Find a deck matching this lesson
     const matchedDeck = decks.find(d => d.lessonId === selectedLesson) || decks[0] || { id: "d1" };
 
     addManualCard({
@@ -125,7 +124,6 @@ export default function AdminFlashcardsPage() {
   const handleParseCsv = () => {
     if (!csvText.trim()) return;
 
-    // Detect delimiter
     let delim = importDelimiter;
     if (delim === "auto") {
       const commas = (csvText.match(/,/g) || []).length;
@@ -139,10 +137,7 @@ export default function AdminFlashcardsPage() {
     let validCount = 0;
     let invalidCount = 0;
 
-    // Simple parser (assuming headers in first line)
-    // Headers: front, back, type, isAffirmationTrue, imageUrl, imageBackUrl, difficulty
     const headers = lines[0].toLowerCase().split(delim).map(h => h.trim().replace(/^["']|["']$/g, ""));
-    
     const requiredHeaders = ["front", "back"];
     const hasRequired = requiredHeaders.every(req => headers.includes(req));
 
@@ -163,9 +158,7 @@ export default function AdminFlashcardsPage() {
       const line = lines[i].trim();
       if (!line) continue;
 
-      // Simple CSV split (handling optional quotes)
       const values = line.split(delim).map(v => v.trim().replace(/^["']|["']$/g, ""));
-      
       const front = values[frontIdx] || "";
       const back = values[backIdx] || "";
       let type: FlashcardType = (values[typeIdx] as FlashcardType) || "definition";
@@ -175,7 +168,6 @@ export default function AdminFlashcardsPage() {
       const imgBackUrl = values[imageBackIdx] || "";
       const diff = (values[diffIdx] as "easy" | "medium" | "hard") || "medium";
 
-      // Simple validation
       const isValid = front.length > 2 && back.length > 2;
 
       if (isValid) {
@@ -209,7 +201,6 @@ export default function AdminFlashcardsPage() {
     const validOnly = parsedCards.filter(c => c.isValid);
     if (validOnly.length === 0) return;
 
-    // We import into the selected manual creation lesson & deck
     const matchedDeck = decks.find(d => d.lessonId === selectedLesson) || decks[0] || { id: "d1" };
 
     validOnly.forEach(card => {
@@ -225,11 +216,11 @@ export default function AdminFlashcardsPage() {
         imageBackUrl: card.imageBackUrl,
         isAffirmationTrue: card.isAffirmationTrue,
         difficulty: card.difficulty,
-        proposeToCommunity: false, // directly imported by admin
+        proposeToCommunity: false,
       });
     });
 
-    setImportSuccess(`${validOnly.length} flashcards importées avec succès dans la leçon sélectionnée !`);
+    setImportSuccess(`${validOnly.length} flashcards importées avec succès !`);
     setCsvText("");
     setParsedCards([]);
     setImportSummary(null);
@@ -237,35 +228,36 @@ export default function AdminFlashcardsPage() {
   };
 
   const loadSampleCsv = () => {
+    const delim = importDelimiter === "auto" ? ";" : importDelimiter;
     setCsvText(
-      `front${importDelimiter === "auto" ? "," : importDelimiter}back${importDelimiter === "auto" ? "," : importDelimiter}type${importDelimiter === "auto" ? "," : importDelimiter}isAffirmationTrue${importDelimiter === "auto" ? "," : importDelimiter}difficulty\n` +
-      `"Quelle est la principale complication d'une sténose aortique serrée ?"${importDelimiter === "auto" ? "," : importDelimiter}"L'insuffisance cardiaque gauche, l'angor d'effort et la syncope."${importDelimiter === "auto" ? "," : importDelimiter}"definition"${importDelimiter === "auto" ? "," : importDelimiter}""${importDelimiter === "auto" ? "," : importDelimiter}"hard"\n` +
-      `"L'ECG d'une péricardite montre typiquement un sous-décalage de l'espace PR."${importDelimiter === "auto" ? "," : importDelimiter}"VRAI - C'est un signe précoce très spécifique."${importDelimiter === "auto" ? "," : importDelimiter}"true_false"${importDelimiter === "auto" ? "," : importDelimiter}"vrai"${importDelimiter === "auto" ? "," : importDelimiter}"medium"\n` +
-      `"La [___] est le traitement de choix de la fibrillation auriculaire instable."${importDelimiter === "auto" ? "," : importDelimiter}"La cardioversion électrique"${importDelimiter === "auto" ? "," : importDelimiter}"fill_blank"${importDelimiter === "auto" ? "," : importDelimiter}""${importDelimiter === "auto" ? "," : importDelimiter}"medium"`
+      `front${delim}back${delim}type${delim}isAffirmationTrue${delim}difficulty\n` +
+      `"Quelle est la principale complication d'une sténose aortique serrée ?"${delim}"L'insuffisance cardiaque gauche, l'angor d'effort et la syncope."${delim}"definition"${delim}""${delim}"hard"\n` +
+      `"L'ECG d'une péricardite montre typiquement un sous-décalage de l'espace PR."${delim}"VRAI - C'est un signe précoce très spécifique."${delim}"true_false"${delim}"vrai"${delim}"medium"\n` +
+      `"La [___] est le traitement de choix de la fibrillation auriculaire instable."${delim}"La cardioversion électrique"${delim}"fill_blank"${delim}""${delim}"medium"`
     );
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6 text-xs text-text-dark">
+    <div className="space-y-6 text-left">
       {/* Title Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-teal/10 pb-4 gap-4">
-        <div className="space-y-1">
-          <h1 className="text-xl font-bold font-display text-text-dark flex items-center gap-2">
-            📇 Administration des Flashcards
+      <div className="flex items-start justify-between border-b border-[rgba(10,61,61,0.08)] pb-5">
+        <div>
+          <h1 className="font-display text-[24px] font-semibold text-[#0D2626]">
+            Administration des Flashcards
           </h1>
-          <p className="text-xs text-text-light">
+          <p className="text-[13px] text-[#7A9E9E] mt-1 font-sans">
             Gérez la file de modération communautaire ou importez de nouvelles flashcards unitaires et en masse.
           </p>
         </div>
 
         {/* Dynamic Tab Switcher */}
-        <div className="flex bg-surface p-1 rounded-xl border border-teal/10 w-fit shrink-0">
+        <div className="flex bg-[#F5FAFA] p-1 rounded-xl border border-[rgba(10,61,61,0.08)] w-fit shrink-0 font-sans">
           <button
             onClick={() => setActiveTab("moderate")}
-            className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === "moderate"
-                ? "bg-teal text-white shadow-sm"
-                : "text-text-light hover:text-text-dark"
+                ? "bg-[#0E7C7B] text-white shadow-sm"
+                : "text-[#7A9E9E] hover:text-[#0D2626]"
             }`}
           >
             <ShieldAlert className="h-3.5 w-3.5" />
@@ -273,10 +265,10 @@ export default function AdminFlashcardsPage() {
           </button>
           <button
             onClick={() => setActiveTab("create")}
-            className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === "create"
-                ? "bg-teal text-white shadow-sm"
-                : "text-text-light hover:text-text-dark"
+                ? "bg-[#0E7C7B] text-white shadow-sm"
+                : "text-[#7A9E9E] hover:text-[#0D2626]"
             }`}
           >
             <Plus className="h-3.5 w-3.5" />
@@ -284,10 +276,10 @@ export default function AdminFlashcardsPage() {
           </button>
           <button
             onClick={() => setActiveTab("import")}
-            className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === "import"
-                ? "bg-teal text-white shadow-sm"
-                : "text-text-light hover:text-text-dark"
+                ? "bg-[#0E7C7B] text-white shadow-sm"
+                : "text-[#7A9E9E] hover:text-[#0D2626]"
             }`}
           >
             <Upload className="h-3.5 w-3.5" />
@@ -298,13 +290,13 @@ export default function AdminFlashcardsPage() {
 
       {/* Target Module / Chapter / Lesson Selector Bar (Shared for Create & Import Tabs) */}
       {(activeTab === "create" || activeTab === "import") && (
-        <div className="p-4 rounded-2xl bg-teal/5 border border-teal/10 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 rounded-xl bg-[#E0F2F2]/30 border border-[#0E7C7B]/10 grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-teal-dark tracking-wider block">Matière / Module Cible</label>
+            <label className="text-[10px] font-black uppercase text-[#0E7C7B] tracking-wider block">Matière / Module Cible</label>
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full p-2.5 rounded-xl border border-teal/20 bg-white font-sans text-xs focus:ring-1 focus:ring-teal focus:outline-none text-text-dark"
+              className="w-full h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] bg-white text-xs font-semibold text-[#0D2626] outline-none focus:border-[#0E7C7B]"
             >
               {LESSONS_DATA.map(subj => (
                 <option key={subj.id} value={subj.id}>{subj.name}</option>
@@ -312,11 +304,11 @@ export default function AdminFlashcardsPage() {
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-teal-dark tracking-wider block">Chapitre / Unité</label>
+            <label className="text-[10px] font-black uppercase text-[#0E7C7B] tracking-wider block">Chapitre / Unité</label>
             <select
               value={selectedChapter}
               onChange={(e) => setSelectedChapter(e.target.value)}
-              className="w-full p-2.5 rounded-xl border border-teal/20 bg-white font-sans text-xs focus:ring-1 focus:ring-teal focus:outline-none text-text-dark"
+              className="w-full h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] bg-white text-xs font-semibold text-[#0D2626] outline-none focus:border-[#0E7C7B]"
               disabled={filteredChapters.length === 0}
             >
               {filteredChapters.map(chap => (
@@ -325,11 +317,11 @@ export default function AdminFlashcardsPage() {
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-teal-dark tracking-wider block">Leçon / Deck de destination</label>
+            <label className="text-[10px] font-black uppercase text-[#0E7C7B] tracking-wider block">Leçon / Deck de destination</label>
             <select
               value={selectedLesson}
               onChange={(e) => setSelectedLesson(e.target.value)}
-              className="w-full p-2.5 rounded-xl border border-teal/20 bg-white font-sans text-xs focus:ring-1 focus:ring-teal focus:outline-none text-text-dark"
+              className="w-full h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] bg-white text-xs font-semibold text-[#0D2626] outline-none focus:border-[#0E7C7B]"
               disabled={filteredLessons.length === 0}
             >
               {filteredLessons.map(lesson => (
@@ -342,14 +334,14 @@ export default function AdminFlashcardsPage() {
 
       {/* --- TAB 1: MODERATION QUEUE --- */}
       {activeTab === "moderate" && (
-        <div className="space-y-4">
+        <div className="space-y-4 font-sans">
           {pendingCards.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-teal/20 p-12 text-center space-y-3 bg-white">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-teal/5 text-teal">
+            <div className="rounded-xl border border-dashed border-[rgba(10,61,61,0.15)] p-12 text-center space-y-3 bg-white">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#E0F2F2] text-[#0E7C7B]">
                 <BookOpen className="h-6 w-6" />
               </div>
-              <h3 className="font-display text-sm font-bold text-text-dark">File de modération vide</h3>
-              <p className="text-[11px] text-text-light max-w-sm mx-auto">
+              <h3 className="font-display text-sm font-bold text-[#0D2626]">File de modération vide</h3>
+              <p className="text-[12px] text-[#7A9E9E] max-w-sm mx-auto">
                 Aucune proposition de flashcard n'est en attente de révision pour le moment.
               </p>
             </div>
@@ -358,32 +350,32 @@ export default function AdminFlashcardsPage() {
               {pendingCards.map(card => (
                 <div 
                   key={card.id}
-                  className="p-5 rounded-2xl border border-teal/10 bg-white shadow-sm flex flex-col md:flex-row gap-5 items-start justify-between hover:shadow-md transition-all"
+                  className="p-5 rounded-xl border border-[rgba(10,61,61,0.08)] bg-white shadow-xs flex flex-col md:flex-row gap-5 items-start justify-between hover:border-[rgba(10,61,61,0.15)] transition-all text-left"
                 >
-                  <div className="flex-1 space-y-3">
+                  <div className="flex-grow space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-teal/5 px-2 py-0.5 text-[9px] font-bold text-teal border border-teal/10 uppercase">
+                      <span className="rounded-full bg-[#E0F2F2] px-2.5 py-0.5 text-[9px] font-bold text-[#0E7C7B] uppercase">
                         {card.type}
                       </span>
-                      <span className="text-[10px] text-text-light font-medium">
-                        Proposé par : <strong className="text-text-dark">{card.authorName || "Anonyme"}</strong>
+                      <span className="text-[11px] text-[#7A9E9E] font-medium">
+                        Proposé par : <strong className="text-[#0D2626] font-semibold">{card.authorName || "Étudiant Anonyme"}</strong>
                       </span>
-                      <span className="text-[10px] text-text-light">•</span>
-                      <span className="text-[10px] text-text-light uppercase font-semibold">
+                      <span className="text-[#7A9E9E]/40 text-xs">•</span>
+                      <span className="text-[11px] text-[#7A9E9E] uppercase font-bold tracking-wider">
                         {card.moduleId}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <span className="text-[9px] font-bold text-text-light uppercase tracking-wider block">Recto (Question)</span>
-                        <p className="font-sans font-medium text-xs text-text-dark bg-surface/40 p-3 rounded-lg border border-teal/5">
+                        <span className="text-[9px] font-bold text-[#7A9E9E] uppercase tracking-wider block">Recto (Question)</span>
+                        <p className="font-semibold text-xs text-[#0D2626] bg-[#F5FAFA] p-3 rounded-lg border border-[rgba(10,61,61,0.05)]">
                           {card.front}
                         </p>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-[9px] font-bold text-text-light uppercase tracking-wider block">Verso (Réponse)</span>
-                        <p className="font-sans font-medium text-xs text-text-dark bg-surface/40 p-3 rounded-lg border border-teal/5">
+                        <span className="text-[9px] font-bold text-[#7A9E9E] uppercase tracking-wider block">Verso (Réponse)</span>
+                        <p className="font-semibold text-xs text-[#0D2626] bg-[#F5FAFA] p-3 rounded-lg border border-[rgba(10,61,61,0.05)]">
                           {card.back}
                         </p>
                       </div>
@@ -401,7 +393,7 @@ export default function AdminFlashcardsPage() {
                             href={card.imageUrl} 
                             target="_blank" 
                             rel="noreferrer"
-                            className="text-teal hover:underline text-[10px] font-semibold"
+                            className="text-[#0E7C7B] hover:underline text-[10px] font-bold"
                           >
                             🖼️ Voir l'image associée
                           </a>
@@ -410,10 +402,10 @@ export default function AdminFlashcardsPage() {
                     )}
                   </div>
 
-                  <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-teal/5">
+                  <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-[rgba(10,61,61,0.05)]">
                     <button
                       onClick={() => handleApprove(card.id)}
-                      className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal px-4 py-2.5 font-bold text-white hover:bg-teal-dark transition-all cursor-pointer text-[10px]"
+                      className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0E7C7B] px-4 py-2 font-bold text-white hover:bg-[#0E7C7B]/95 transition-all cursor-pointer text-[10px] uppercase tracking-wider"
                     >
                       <Check className="h-4 w-4" /> Approuver
                     </button>
@@ -424,18 +416,18 @@ export default function AdminFlashcardsPage() {
                           placeholder="Indiquez le motif de rejet..."
                           value={rejectReason[card.id] || ""}
                           onChange={(e) => handleReasonChange(card.id, e.target.value)}
-                          className="w-full p-2 border border-error/25 bg-white text-[11px] rounded-lg focus:outline-none"
+                          className="w-full p-2 border border-red-200 bg-white text-[11px] rounded-lg focus:outline-none focus:border-red-500"
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleReject(card.id)}
-                            className="flex-1 py-1.5 bg-error text-white font-bold rounded-lg hover:bg-error/95 cursor-pointer"
+                            className="flex-1 py-1 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 cursor-pointer text-[10px] uppercase"
                           >
                             Confirmer
                           </button>
                           <button
                             onClick={() => setActiveRejectId(null)}
-                            className="px-2 py-1.5 border border-teal/15 text-text-light font-bold rounded-lg hover:bg-surface cursor-pointer"
+                            className="px-2 py-1 border border-[rgba(10,61,61,0.12)] text-[#7A9E9E] font-bold rounded-lg hover:bg-[#F5FAFA] cursor-pointer text-[10px] uppercase"
                           >
                             Annuler
                           </button>
@@ -444,7 +436,7 @@ export default function AdminFlashcardsPage() {
                     ) : (
                       <button
                         onClick={() => setActiveRejectId(card.id)}
-                        className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-error/20 bg-white px-4 py-2.5 font-bold text-error hover:bg-red-50 transition-all cursor-pointer text-[10px]"
+                        className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-4 py-2 font-bold text-red-600 hover:bg-red-50 transition-all cursor-pointer text-[10px] uppercase tracking-wider"
                       >
                         <X className="h-4 w-4" /> Rejeter
                       </button>
@@ -459,22 +451,22 @@ export default function AdminFlashcardsPage() {
 
       {/* --- TAB 2: MANUAL CREATION FORM WITH PREVIEW --- */}
       {activeTab === "create" && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start font-sans">
           {/* Creator form */}
-          <form onSubmit={handleCreateCardSubmit} className="lg:col-span-7 space-y-5 bg-white p-6 rounded-3xl border border-teal/10 shadow-sm">
-            <h3 className="font-display text-sm font-bold text-text-dark flex items-center gap-1.5">
-              <Plus className="h-4 w-4 text-teal" /> Nouvelle Flashcard Unitaire
+          <form onSubmit={handleCreateCardSubmit} className="lg:col-span-7 space-y-5 bg-white p-6 rounded-xl border border-[rgba(10,61,61,0.08)] shadow-xs text-left">
+            <h3 className="font-display text-sm font-bold text-[#0D2626] flex items-center gap-1.5">
+              <Plus className="h-4 w-4 text-[#0E7C7B]" /> Nouvelle Flashcard Unitaire
             </h3>
 
             {successMessage && (
-              <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl font-medium flex items-center gap-2">
+              <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-lg font-medium flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" /> {successMessage}
               </div>
             )}
 
             {/* Type Selector */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-wider text-text-light">Type de Flashcard</label>
+              <label className="text-[10px] font-black uppercase tracking-wider text-[#7A9E9E]">Type de Flashcard</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {([
                   { id: "definition", label: "Définition", icon: BookOpen },
@@ -493,10 +485,10 @@ export default function AdminFlashcardsPage() {
                         setCardType(tab.id);
                         setPreviewFlipped(false);
                       }}
-                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                      className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
                         isSelected 
-                          ? "bg-teal border-teal text-white shadow-sm" 
-                          : "bg-white border-teal/15 text-text-light hover:bg-surface"
+                          ? "bg-[#0E7C7B] border-[#0E7C7B] text-white shadow-xs" 
+                          : "bg-white border-[rgba(10,61,61,0.15)] text-[#7A9E9E] hover:bg-[#F5FAFA]"
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -510,7 +502,7 @@ export default function AdminFlashcardsPage() {
             {/* Content Fields */}
             <div className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-text-light block">
+                <label className="text-[10px] font-black uppercase text-[#7A9E9E] block">
                   {cardType === "true_false" ? "Affirmation (Recto)" : cardType === "fill_blank" ? "Texte avec trous [___] (Recto)" : "Question / Concept (Recto)"}
                 </label>
                 <textarea
@@ -519,12 +511,12 @@ export default function AdminFlashcardsPage() {
                   placeholder={cardType === "fill_blank" ? "Le cœur possède [___] cavités." : "ex: Qu'est-ce que l'insuffisance cardiaque ?"}
                   rows={3}
                   required
-                  className="w-full p-3 rounded-xl border border-teal/20 bg-white font-sans text-xs focus:ring-1 focus:ring-teal focus:outline-none text-text-dark"
+                  className="w-full p-3 rounded-lg border border-[rgba(10,61,61,0.12)] bg-white text-xs outline-none focus:border-[#0E7C7B] text-[#0D2626] font-semibold"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-text-light block">
+                <label className="text-[10px] font-black uppercase text-[#7A9E9E] block">
                   {cardType === "true_false" ? "Explication (Verso)" : cardType === "fill_blank" ? "Texte complet résolu (Verso)" : "Réponse / Définition (Verso)"}
                 </label>
                 <textarea
@@ -533,20 +525,20 @@ export default function AdminFlashcardsPage() {
                   placeholder={cardType === "fill_blank" ? "Le cœur possède [quatre] cavités." : "ex: Incapacité du cœur à pomper suffisamment de sang..."}
                   rows={3}
                   required
-                  className="w-full p-3 rounded-xl border border-teal/20 bg-white font-sans text-xs focus:ring-1 focus:ring-teal focus:outline-none text-text-dark"
+                  className="w-full p-3 rounded-lg border border-[rgba(10,61,61,0.12)] bg-white text-xs outline-none focus:border-[#0E7C7B] text-[#0D2626] font-semibold"
                 />
               </div>
 
               {/* Conditional parameters */}
               {cardType === "true_false" && (
-                <div className="flex items-center gap-4 bg-teal/5 p-3 rounded-xl border border-teal/10">
-                  <span className="text-[10px] font-black uppercase text-teal-dark">Valeur de l'affirmation</span>
+                <div className="flex items-center gap-4 bg-[#E0F2F2]/30 p-3 rounded-lg border border-[#0E7C7B]/10">
+                  <span className="text-[10px] font-black uppercase text-[#0E7C7B]">Valeur de l'affirmation</span>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => setIsAffirmationTrue(true)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                        isAffirmationTrue ? "bg-emerald-600 text-white animate-pulse" : "bg-white text-text-light border border-teal/10 hover:bg-surface"
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                        isAffirmationTrue ? "bg-emerald-600 text-white" : "bg-white text-[#7A9E9E] border border-[rgba(10,61,61,0.12)] hover:bg-[#F5FAFA]"
                       }`}
                     >
                       VRAI
@@ -554,8 +546,8 @@ export default function AdminFlashcardsPage() {
                     <button
                       type="button"
                       onClick={() => setIsAffirmationTrue(false)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                        !isAffirmationTrue ? "bg-rose-600 text-white animate-pulse" : "bg-white text-text-light border border-teal/10 hover:bg-surface"
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                        !isAffirmationTrue ? "bg-rose-600 text-white" : "bg-white text-[#7A9E9E] border border-[rgba(10,61,61,0.12)] hover:bg-[#F5FAFA]"
                       }`}
                     >
                       FAUX
@@ -565,26 +557,26 @@ export default function AdminFlashcardsPage() {
               )}
 
               {(cardType === "image_question" || cardType === "image_label") && (
-                <div className="space-y-3 p-3 bg-teal/5 border border-teal/10 rounded-2xl">
+                <div className="space-y-3 p-3 bg-[#E0F2F2]/30 border border-[#0E7C7B]/10 rounded-lg">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-teal-dark block">URL de l'image (Recto)</label>
+                    <label className="text-[10px] font-black uppercase text-[#0E7C7B] block">URL de l'image (Recto)</label>
                     <input
                       type="url"
                       value={imageUrl}
                       onChange={(e) => setImageUrl(e.target.value)}
                       placeholder="https://ex.com/image.jpg"
-                      className="w-full p-2.5 rounded-xl border border-teal/20 bg-white font-sans text-xs focus:ring-1 focus:ring-teal focus:outline-none text-text-dark"
+                      className="w-full p-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] bg-white text-xs outline-none focus:border-[#0E7C7B] text-[#0D2626]"
                     />
                   </div>
                   {cardType === "image_label" && (
                     <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase text-teal-dark block">URL de l'image annotée (Verso)</label>
+                      <label className="text-[10px] font-black uppercase text-[#0E7C7B] block">URL de l'image annotée (Verso)</label>
                       <input
                         type="url"
                         value={imageBackUrl}
                         onChange={(e) => setImageBackUrl(e.target.value)}
                         placeholder="https://ex.com/annotated-image.jpg"
-                        className="w-full p-2.5 rounded-xl border border-teal/20 bg-white font-sans text-xs focus:ring-1 focus:ring-teal focus:outline-none text-text-dark"
+                        className="w-full p-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] bg-white text-xs outline-none focus:border-[#0E7C7B] text-[#0D2626]"
                       />
                     </div>
                   )}
@@ -594,11 +586,11 @@ export default function AdminFlashcardsPage() {
               {/* Difficulty & Visibility options */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase text-text-light block">Difficulté</label>
+                  <label className="text-[10px] font-black uppercase text-[#7A9E9E] block">Difficulté</label>
                   <select
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value as any)}
-                    className="w-full p-2.5 rounded-xl border border-teal/20 bg-white font-sans text-xs focus:ring-1 focus:ring-teal focus:outline-none text-text-dark"
+                    className="w-full h-9 px-2.5 rounded-lg border border-[rgba(10,61,61,0.12)] bg-white text-xs font-semibold text-[#0D2626] outline-none focus:border-[#0E7C7B]"
                   >
                     <option value="easy">Facile</option>
                     <option value="medium">Moyen</option>
@@ -606,15 +598,15 @@ export default function AdminFlashcardsPage() {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-2 self-end h-10 border border-teal/15 px-3 rounded-xl bg-surface/30">
+                <div className="flex items-center gap-2 self-end h-9 border border-[rgba(10,61,61,0.12)] px-3 rounded-lg bg-[#F5FAFA]">
                   <input
                     type="checkbox"
                     id="propose"
                     checked={proposeToCommunity}
                     onChange={(e) => setProposeToCommunity(e.target.checked)}
-                    className="h-4 w-4 text-teal rounded focus:ring-teal"
+                    className="h-4 w-4 text-[#0E7C7B] rounded focus:ring-[#0E7C7B]"
                   />
-                  <label htmlFor="propose" className="text-[10px] font-bold text-text-dark cursor-pointer select-none">
+                  <label htmlFor="propose" className="text-[10px] font-bold text-[#0D2626] cursor-pointer select-none">
                     Proposer à la communauté (attente de modération)
                   </label>
                 </div>
@@ -623,20 +615,20 @@ export default function AdminFlashcardsPage() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-teal text-white font-bold rounded-xl hover:bg-teal-dark transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm text-[11px] uppercase tracking-wider"
+              className="w-full py-2.5 bg-[#0E7C7B] text-white font-bold rounded-lg hover:bg-[#0E7C7B]/95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs text-[11px] uppercase tracking-wider"
             >
               <Check className="h-4 w-4" /> Enregistrer la Flashcard
             </button>
           </form>
 
           {/* Interactive Card Preview */}
-          <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-4">
+          <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-4 text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-wider text-text-light">Aperçu Réaliste</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#7A9E9E]">Aperçu Réaliste</span>
               <button
                 type="button"
                 onClick={() => setPreviewFlipped(prev => !prev)}
-                className="text-teal hover:underline font-bold text-[10px] uppercase flex items-center gap-1 cursor-pointer"
+                className="text-[#0E7C7B] hover:underline font-bold text-[10px] uppercase flex items-center gap-1 cursor-pointer"
               >
                 <ArrowUpDown className="h-3.5 w-3.5" /> Retourner la carte
               </button>
@@ -645,19 +637,18 @@ export default function AdminFlashcardsPage() {
             {/* Flashcard container */}
             <div 
               onClick={() => setPreviewFlipped(prev => !prev)}
-              className="w-full aspect-[4/3] rounded-3xl p-6 bg-gradient-to-br from-[#0F3838] to-[#0A2626] border border-teal/20 relative shadow-xl flex flex-col justify-between overflow-hidden cursor-pointer select-none text-white transition-all transform hover:scale-[1.01] duration-300"
+              className="w-full aspect-[4/3] rounded-2xl p-6 bg-gradient-to-br from-[#0F3838] to-[#0A2626] border border-[#0E7C7B]/20 relative shadow-lg flex flex-col justify-between overflow-hidden cursor-pointer select-none text-white transition-all transform hover:scale-[1.01] duration-300"
             >
-              {/* Radial Top-Left Light Effect */}
-              <div className="absolute top-0 left-0 w-48 h-48 bg-teal-light/5 rounded-full filter blur-3xl pointer-events-none" />
+              <div className="absolute top-0 left-0 w-48 h-48 bg-[#0E7C7B]/5 rounded-full filter blur-3xl pointer-events-none" />
 
               {/* Front view */}
               {!previewFlipped ? (
                 <>
                   <div className="flex items-center justify-between z-10">
-                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase border border-white/10 text-teal-light">
+                    <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase border border-white/10 text-[#E0F2F2]">
                       {cardType}
                     </span>
-                    <span className="text-[9px] text-teal-light/60 uppercase font-black tracking-widest">{difficulty}</span>
+                    <span className="text-[9px] text-[#E0F2F2]/60 uppercase font-black tracking-widest">{difficulty}</span>
                   </div>
 
                   <div className="my-auto text-center space-y-4 z-10 px-4">
@@ -666,12 +657,12 @@ export default function AdminFlashcardsPage() {
                         <img src={imageUrl} alt="preview" className="object-cover h-full w-full" />
                       </div>
                     )}
-                    <h2 className="text-sm font-sans font-bold leading-relaxed text-white">
+                    <h2 className="text-xs font-sans font-bold leading-relaxed text-white">
                       {frontText || "Saisissez votre question recto..."}
                     </h2>
                   </div>
 
-                  <div className="text-center text-[9px] text-teal-light/40 z-10">
+                  <div className="text-center text-[9px] text-[#E0F2F2]/40 z-10">
                     Recto (Cliquez pour retourner)
                   </div>
                 </>
@@ -679,7 +670,7 @@ export default function AdminFlashcardsPage() {
                 /* Back view */
                 <>
                   <div className="flex items-center justify-between z-10">
-                    <span className="rounded-full bg-teal px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase text-white">
+                    <span className="rounded-full bg-[#0E7C7B] px-2.5 py-0.5 text-[8px] font-bold tracking-wider uppercase text-white">
                       RÉPONSE
                     </span>
                     {cardType === "true_false" && (
@@ -695,12 +686,12 @@ export default function AdminFlashcardsPage() {
                         <img src={imageBackUrl} alt="preview back" className="object-cover h-full w-full" />
                       </div>
                     )}
-                    <p className="text-xs font-sans font-medium text-teal-light/95 leading-relaxed whitespace-pre-line">
+                    <p className="text-xs font-sans font-medium text-[#E0F2F2]/95 leading-relaxed whitespace-pre-line">
                       {backText || "Saisissez votre réponse verso..."}
                     </p>
                   </div>
 
-                  <div className="text-center text-[9px] text-teal-light/40 z-10">
+                  <div className="text-center text-[9px] text-[#E0F2F2]/40 z-10">
                     Verso (Cliquez pour retourner)
                   </div>
                 </>
@@ -712,76 +703,76 @@ export default function AdminFlashcardsPage() {
 
       {/* --- TAB 3: BULK IMPORT FROM CSV/TSV --- */}
       {activeTab === "import" && (
-        <div className="space-y-6 bg-white p-6 rounded-3xl border border-teal/10 shadow-sm">
+        <div className="space-y-6 bg-white p-6 rounded-xl border border-[rgba(10,61,61,0.08)] shadow-xs text-left font-sans">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="font-display text-sm font-bold text-text-dark flex items-center gap-1.5">
-              <FileSpreadsheet className="h-4 w-4 text-teal" /> Import de Flashcards en Masse
+            <h3 className="font-display text-sm font-bold text-[#0D2626] flex items-center gap-1.5">
+              <FileSpreadsheet className="h-4 w-4 text-[#0E7C7B]" /> Import de Flashcards en Masse
             </h3>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={loadSampleCsv}
-                className="px-2.5 py-1.5 text-[10px] font-bold border border-teal/15 text-teal hover:bg-teal/5 rounded-lg cursor-pointer transition-all"
+                className="px-2.5 py-1.5 text-[10px] font-bold border border-[rgba(10,61,61,0.12)] text-[#0E7C7B] hover:bg-[#E0F2F2]/20 rounded-lg cursor-pointer transition-all"
               >
                 📝 Charger un modèle CSV
               </button>
               <select
                 value={importDelimiter}
                 onChange={(e: any) => setImportDelimiter(e.target.value)}
-                className="p-1.5 rounded-lg border border-teal/20 text-[10px] font-bold bg-white"
+                className="h-8 px-2 rounded-lg border border-[rgba(10,61,61,0.12)] text-[10px] font-bold bg-white outline-none"
               >
                 <option value="auto">Détection Auto</option>
-                <option value=",">Séparateur Virgule (,)</option>
-                <option value=";">Séparateur Point-Virgule (;)</option>
-                <option value="\t">Séparateur Tabulation (TSV)</option>
+                <option value=",">Virgule (,)</option>
+                <option value=";">Point-Virgule (;)</option>
+                <option value="\t">Tabulation (TSV)</option>
               </select>
             </div>
           </div>
 
           {importSuccess && (
-            <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl font-medium flex items-center gap-2 text-xs">
+            <div className="p-3 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-lg font-medium flex items-center gap-2 text-xs">
               <CheckCircle className="h-4 w-4" /> {importSuccess}
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-text-light block">
-              Collez vos données tabulaires (avec entêtes : front, back, type, isAffirmationTrue, difficulty)
+            <label className="text-[10px] font-black uppercase text-[#7A9E9E] block">
+              Collez vos données tabulaires (avec entêtes : front;back;type;isAffirmationTrue;difficulty)
             </label>
             <textarea
               value={csvText}
               onChange={(e) => setCsvText(e.target.value)}
-              placeholder={`front,back,type,isAffirmationTrue,difficulty\n"Quel est le rythme sinusal normal ?","60-100 bpm","definition","","easy"`}
+              placeholder={`front;back;type;isAffirmationTrue;difficulty\n"Quel est le rythme sinusal normal ?";"60-100 bpm";"definition";"";"easy"`}
               rows={8}
-              className="w-full p-3 font-mono text-[11px] rounded-xl border border-teal/20 bg-white focus:ring-1 focus:ring-teal focus:outline-none"
+              className="w-full p-3 font-mono text-[11px] rounded-lg border border-[rgba(10,61,61,0.12)] bg-white focus:border-[#0E7C7B] focus:outline-none"
             />
           </div>
 
           <button
             type="button"
             onClick={handleParseCsv}
-            className="px-4 py-2.5 bg-teal text-white font-bold rounded-xl hover:bg-teal-dark transition-all flex items-center justify-center gap-1.5 cursor-pointer text-[10px] uppercase tracking-wider shadow-sm"
+            className="px-4 py-2 bg-[#0E7C7B] text-white font-bold rounded-lg hover:bg-[#0E7C7B]/95 transition-all flex items-center justify-center gap-1.5 cursor-pointer text-[10px] uppercase tracking-wider shadow-xs"
           >
             <Sparkles className="h-3.5 w-3.5" /> Analyser les données
           </button>
 
           {/* Validation & Preview table */}
           {importSummary && (
-            <div className="space-y-4 pt-4 border-t border-teal/5">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-teal/5 border border-teal/10">
+            <div className="space-y-4 pt-4 border-t border-[rgba(10,61,61,0.08)]">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-[#E0F2F2]/30 border border-[#0E7C7B]/10">
                 <div className="flex gap-4">
-                  <span className="text-[10px] font-bold text-text-dark">Total détecté: <strong className="text-teal font-black">{importSummary.total}</strong></span>
-                  <span className="text-[10px] font-bold text-text-dark">Valides: <strong className="text-emerald-600 font-black">{importSummary.valid}</strong></span>
-                  <span className="text-[10px] font-bold text-text-dark">Invalides: <strong className="text-rose-600 font-black">{importSummary.invalid}</strong></span>
+                  <span className="text-[11px] font-bold text-[#0D2626]">Total détecté: <strong className="text-[#0E7C7B] font-black">{importSummary.total}</strong></span>
+                  <span className="text-[11px] font-bold text-[#0D2626]">Valides: <strong className="text-emerald-600 font-black">{importSummary.valid}</strong></span>
+                  <span className="text-[11px] font-bold text-[#0D2626]">Invalides: <strong className="text-red-600 font-black">{importSummary.invalid}</strong></span>
                 </div>
                 <button
                   type="button"
                   disabled={importSummary.valid === 0}
                   onClick={executeBulkImport}
-                  className={`px-4 py-2 rounded-xl font-bold uppercase text-[10px] tracking-wider transition-all flex items-center gap-1 ${
+                  className={`px-4 py-2 rounded-lg font-bold uppercase text-[10px] tracking-wider transition-all flex items-center gap-1 ${
                     importSummary.valid > 0
-                      ? "bg-teal text-white hover:bg-teal-dark cursor-pointer shadow-sm"
-                      : "bg-surface text-text-light border border-teal/5 cursor-not-allowed"
+                      ? "bg-[#0E7C7B] text-white hover:bg-[#0E7C7B]/95 cursor-pointer shadow-xs"
+                      : "bg-[#F5FAFA] text-[#7A9E9E] border border-[rgba(10,61,61,0.12)] cursor-not-allowed"
                   }`}
                 >
                   <Check className="h-3.5 w-3.5" /> Importer les {importSummary.valid} cartes valides
@@ -789,10 +780,10 @@ export default function AdminFlashcardsPage() {
               </div>
 
               {/* Data Table */}
-              <div className="max-h-60 overflow-y-auto border border-teal/10 rounded-xl">
+              <div className="max-h-60 overflow-y-auto border border-[rgba(10,61,61,0.08)] rounded-lg">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-surface text-[9px] font-black uppercase tracking-wider text-text-light border-b border-teal/10">
+                    <tr className="bg-[#F5FAFA] text-[9px] font-black uppercase tracking-wider text-[#7A9E9E] border-b border-[rgba(10,61,61,0.08)]">
                       <th className="p-2.5">Status</th>
                       <th className="p-2.5">Recto (Front)</th>
                       <th className="p-2.5">Verso (Back)</th>
@@ -802,22 +793,22 @@ export default function AdminFlashcardsPage() {
                   </thead>
                   <tbody>
                     {parsedCards.map((card, idx) => (
-                      <tr key={card.id} className={`border-b border-teal/5 text-[10px] ${card.isValid ? "bg-white hover:bg-surface/30" : "bg-red-50/40"}`}>
+                      <tr key={card.id} className={`border-b border-[rgba(10,61,61,0.05)] text-[11px] ${card.isValid ? "bg-white hover:bg-[#F5FAFA]" : "bg-red-50/40"}`}>
                         <td className="p-2.5">
                           {card.isValid ? (
                             <span className="inline-flex items-center gap-0.5 text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">
                               <Check className="h-3 w-3" /> Prêt
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-0.5 text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded">
+                            <span className="inline-flex items-center gap-0.5 text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded">
                               <X className="h-3 w-3" /> Invalide
                             </span>
                           )}
                         </td>
-                        <td className="p-2.5 font-medium max-w-xs truncate">{card.front}</td>
-                        <td className="p-2.5 font-medium max-w-xs truncate">{card.back}</td>
-                        <td className="p-2.5 uppercase font-bold text-teal">{card.type}</td>
-                        <td className="p-2.5 uppercase font-bold text-text-light">{card.difficulty}</td>
+                        <td className="p-2.5 font-medium max-w-xs truncate text-[#0D2626]">{card.front}</td>
+                        <td className="p-2.5 font-medium max-w-xs truncate text-[#0D2626]">{card.back}</td>
+                        <td className="p-2.5 uppercase font-bold text-[#0E7C7B]">{card.type}</td>
+                        <td className="p-2.5 uppercase font-bold text-[#7A9E9E]">{card.difficulty}</td>
                       </tr>
                     ))}
                   </tbody>
